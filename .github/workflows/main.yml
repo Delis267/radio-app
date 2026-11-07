@@ -4,10 +4,9 @@ on:
   push:
     branches: [main]
 
+# Auf main laufen keine PR-Schritte, Lesen reicht
 permissions:
   contents: read
-  pull-requests: write
-  checks: write
 
 jobs:
   checks:

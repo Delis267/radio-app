@@ -1,11 +1,54 @@
-# Gemeinsame Prüfungen, aufgerufen von pr.yml, main.yml und release.yml
+# Gemeinsame Prüfungen, aufgerufen von pr.yml, main.yml und release.yml.
+# Lint und Build & Test laufen parallel, zusammen entsprechen sie ./gradlew check.
 name: Checks
 
 on:
   workflow_call:
 
 jobs:
-  check:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v6
+
+      # Android Lint (Android-Regeln) und ktlint (Kotlin-Stil)
+      - name: Lint und ktlint ausführen
+        run: ./gradlew lintDebug ktlintCheck --continue
+
+      - uses: reviewdog/action-setup@v1
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+
+      # Befunde als Annotationen an diesem Job, nur für geänderte Zeilen
+      - name: Befunde an den Zeilen anzeigen
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for f in app/build/reports/ktlint/*Check/*.xml; do
+            [ -f "$f" ] && reviewdog -f=checkstyle -name=ktlint \
+              -reporter=github-pr-annotations -fail-level=none < "$f"
+          done
+          f=app/build/reports/lint-results-debug.sarif
+          [ -f "$f" ] && reviewdog -f=sarif -name=android-lint \
+            -reporter=github-pr-annotations -fail-level=none < "$f"
+          true
+
+      - name: Berichte hochladen
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lint-berichte
+          path: |
+            app/build/reports/lint-results-debug.*
+            app/build/reports/ktlint/
+
+  build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
     steps:
@@ -16,57 +59,33 @@ jobs:
           java-version: 25
       - uses: gradle/actions/setup-gradle@v6
 
-      # check = Unit-, Architektur- und Robolectric-Tests, Android Lint, ktlint
-      - name: Bauen und prüfen
-        run: ./gradlew assembleDebug check createDebugUnitTestCoverageReport --continue
+      # Unit-, Architektur- und Robolectric-Tests
+      - name: Bauen und testen
+        run: ./gradlew assembleDebug testDebugUnitTest createDebugUnitTestCoverageReport --continue
 
-      - uses: reviewdog/action-setup@v1
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-
-      - name: Lint- und ktlint-Befunde als Annotationen melden
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Berichte aller Source-Sets zu einem zusammenführen, sonst
-          # überschreiben sich die gleichnamigen Checks gegenseitig
-          {
-            echo '<?xml version="1.0" encoding="utf-8"?><checkstyle version="8.0">'
-            for f in app/build/reports/ktlint/*Check/*.xml; do
-              [ -f "$f" ] && sed -e '/<?xml/d' -e '/<checkstyle/d' -e '/<\/checkstyle>/d' "$f"
-            done
-            echo '</checkstyle>'
-          } | reviewdog -f=checkstyle -name=ktlint \
-            -reporter=github-pr-check -fail-level=none
-          f=app/build/reports/lint-results-debug.sarif
-          [ -f "$f" ] && reviewdog -f=sarif -name=android-lint \
-            -reporter=github-pr-check -fail-level=none < "$f"
-          true
-
-      - name: Testergebnisse am PR kommentieren
+      - name: Testergebnisse in der Zusammenfassung melden
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         uses: mikepenz/action-junit-report@v6
         with:
           annotate_only: true
           report_paths: app/build/test-results/**/*.xml
-          comment: true
           include_passed: false
 
-      - name: Testabdeckung am PR kommentieren
+      - name: Testabdeckung in der Zusammenfassung melden
         if: ${{ !cancelled() && github.event_name == 'pull_request' && hashFiles('app/build/reports/coverage/test/debug/report.xml') != '' }}
         uses: madrapps/jacoco-report@v1.8.0
         with:
           paths: app/build/reports/coverage/test/debug/report.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           title: Testabdeckung
-          update-comment: true
+          comment-type: summary
 
-      - name: Berichte hochladen
+      - name: Testberichte hochladen
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: berichte
-          path: app/build/reports/
+          name: test-berichte
+          path: app/build/reports/tests/
 
       - name: Debug-APK hochladen
         if: github.ref == 'refs/heads/main'
@@ -74,4 +93,3 @@ jobs:
         with:
           name: radio-app-debug
           path: app/build/outputs/apk/debug/*.apk
-

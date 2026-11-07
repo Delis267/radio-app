@@ -3,7 +3,7 @@ GitHub Actions baut und prüft jeden PR. Ein PR darf erst gemergt werden, wenn a
 
 | Workflow | Auslöser | Ergebnis |
 |---|---|---|
-| PR | jeder Pull Request | Build, Tests, Lint, ktlint. Befunde, Testergebnisse und Testabdeckung als PR-Kommentar |
+| PR | jeder Pull Request | Build, Tests, Lint, ktlint. Befunde als Annotationen, Testergebnisse und Testabdeckung in der Zusammenfassung |
 | Main | Push auf `main` | dieselben Prüfungen, Debug-APK als Artefakt |
 | Release | Tag `vX.Y.Z` | dieselben Prüfungen, signiertes APK als GitHub-Release |
 
@@ -14,7 +14,7 @@ GitHub Actions baut und prüft jeden PR. Ein PR darf erst gemergt werden, wenn a
 # Begründung
 Fehler sollen vor dem Merge auffallen, nicht danach auf `main`.
 Eine gute CI und Testinfra ermöglicht uns eine effiziente asynchrone Teamarbeit.
-Kommentare am PR zeigen Befunde dort, wo reviewt wird, ohne Logs zu lesen.
+Annotationen und Zusammenfassung zeigen Befunde am Check, ohne Logs zu lesen und ohne den PR mit Kommentaren zu füllen.
 Ein Release per Tag liefert der Gruppe und den Prüfenden ein installierbares APK ohne Handarbeit.
 
 # Alternativen
