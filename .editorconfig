@@ -1,0 +1,7 @@
+root = true
+
+[*.{kt,kts}]
+# Composables heißen in PascalCase
+ktlint_function_naming_ignore_when_annotated_with = Composable
+# Paketname com.iu.radio_app enthält einen Unterstrich
+ktlint_standard_package-name = disabled
