@@ -26,6 +26,11 @@ local.properties
 *.keystore
 keystore.properties
 
+# ── Claude Code ──────────────────────────────────────
+# settings.json wird geteilt, persönliche Einstellungen nicht
+.claude/settings.local.json
+.claude/worktrees/
+
 # ── Betriebssystem ───────────────────────────────────
 .DS_Store
 Thumbs.db

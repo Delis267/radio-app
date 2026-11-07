@@ -5,6 +5,31 @@ on:
   workflow_call:
 
 jobs:
+  # ADR 008: Commits macht nur ein Mensch
+  no-ai-commits:
+    name: Keine KI-Commits
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Commits des PR auf KI-Kennzeichnung prüfen
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          found=$({
+            git log --format='%h %s' -i -E --grep='co-authored-by:.*(claude|anthropic)' "$BASE..$HEAD"
+            git log --format='%h %s' --author='noreply@anthropic.com' "$BASE..$HEAD"
+          } | sort -u)
+          if [ -n "$found" ]; then
+            echo "::error::Der PR enthält Commits, die als KI-Commit gekennzeichnet sind (ADR 008)."
+            echo "$found"
+            exit 1
+          fi
+          echo "Keine KI-Commits gefunden."
+
   check:
     name: Build & Unit-Tests
     runs-on: ubuntu-latest
