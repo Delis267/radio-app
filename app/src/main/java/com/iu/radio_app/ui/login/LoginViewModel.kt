@@ -1,8 +1,8 @@
 package com.iu.radio_app.ui.login
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.annotation.StringRes
 import com.iu.radio_app.R
 import com.iu.radio_app.data.auth.AuthRepository
 import com.iu.radio_app.data.auth.InvalidCredentialsException
@@ -23,14 +23,6 @@ class LoginViewModel
         private val state = MutableStateFlow(LoginUiState())
         val uiState: StateFlow<LoginUiState> = state.asStateFlow()
 
-        init {
-            viewModelScope.launch {
-                authRepository.currentUser.collect { user ->
-                    state.update { it.copy(signedInAs = user?.email) }
-                }
-            }
-        }
-
         fun onEmailChange(email: String) = state.update { it.copy(email = email, errorMessage = null) }
 
         fun onPasswordChange(password: String) = state.update { it.copy(password = password, errorMessage = null) }
@@ -45,10 +37,6 @@ class LoginViewModel
                     .onSuccess { state.update { it.copy(isLoading = false, password = "") } }
                     .onFailure { error -> state.update { it.copy(isLoading = false, errorMessage = error.toMessage()) } }
             }
-        }
-
-        fun signOut() {
-            viewModelScope.launch { authRepository.signOut() }
         }
 
         @StringRes
