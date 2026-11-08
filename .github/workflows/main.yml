@@ -1,0 +1,13 @@
+name: Main
+
+on:
+  push:
+    branches: [main]
+
+# Auf main laufen keine PR-Schritte, Lesen reicht
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
