@@ -9,4 +9,4 @@ Requires JDK 25 (`JAVA_HOME`, Android Studio's bundled JBR works).
 
 ### Domain docs
 
-Single-context: one `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+Single-context: one `docs/adr/` at the repo root.

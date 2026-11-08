@@ -3,8 +3,8 @@ Wir nutzen Claude Code für Recherche, Entwürfe und Code.
 Jeder Commit und jeder Push wird von einem Menschen gemacht, nie von der KI.
 
 - Wer committet, hat die Änderung gelesen und verantwortet sie.
-- `.claude/settings.json` ist eingecheckt. Ein Hook blockiert dort alle Git-Befehle, die Commits anlegen oder veröffentlichen.
-- Persönliche Einstellungen (`.claude/settings.local.json`) bleiben lokal.
+- `.claude/settings.json` ist eingecheckt und für alle gleich. Ein Hook blockiert dort alle Git-Befehle, die Commits anlegen oder veröffentlichen.
+- 
 
 # Begründung
 Die KI beschleunigt die Arbeit, die Verantwortung für den Code bleibt bei der Gruppe.

@@ -5,15 +5,20 @@ Die UI hängt von der Datenschicht ab, nie umgekehrt. Ein Gradle-Modul `app`.
 ```
 app/src/main/java/com/iu/radio_app/
 ├── MainActivity.kt
+├── model/                Domänenmodell: Track, Show, SongRequest, Rating, User
 ├── ui/
 │   ├── theme/
 │   └── <feature>/        Screen, ViewModel, UiState
 └── data/
-    └── <thema>/          <Thema>Repository (Interface), Stub-/Firestore-Implementierung
+    └── <topic>/          <Topic>Repository (Interface), Stub-/Firestore-Implementierung, ggf. DTOs
 ```
 
-- Repository-Interfaces liegen in `data/<thema>/`, neben ihren Implementierungen.
-- Repositories liefern `Flow` und eigene Modelle, Firebase-Typen verlassen `data/` nicht.
+- Code ist englisch, die Fachsprache deutsch. `GLOSSARY.md` ordnet die Begriffe einander zu.
+- `model/` enthält reine Kotlin-Klassen ohne Android, Firebase und Abhängigkeiten auf `data/` oder `ui/`.
+  Kleine Fachlogik direkt am Modell ist erlaubt.
+- Repository-Interfaces liegen in `data/<topic>/`, neben ihren Implementierungen.
+- Repositories liefern `Flow` und Modelle aus `model/`, Firebase-Typen und DTOs verlassen `data/` nicht.
+- Ein eigener UiState-Typ für Daten entsteht nur, wenn der Bildschirm sie aufbereitet anzeigt.
 - Repository und Datenquelle bleiben zusammengelegt, bis es eine zweite Quelle gibt.
 - Ein Paket `domain/` mit Use Cases entsteht erst, wenn Logik von mehreren ViewModels geteilt wird.
 - Die Regeln prüft ein Konsist-Test (`ArchitekturTest`), nicht nur die Konvention.

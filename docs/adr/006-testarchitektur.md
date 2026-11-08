@@ -12,8 +12,6 @@ Das Repository-Interface ist die einzige Naht für Fakes. Getestet wird von beid
 - Fake und echte Implementierung bestehen denselben Vertragstest, damit der Fake das echte Verhalten abbildet.
 - Alles außer Firestore läuft auf der JVM und damit in `./gradlew check`.
 - `src/androidTest` enthält nur Tests, die ein Gerät brauchen, und läuft nur lokal.
-- Firestore-Tests laufen nur lokal gegen den Firebase-Emulator, nicht in CI,
-  und vor jedem Merge, der die Datenschicht ändert.
 
 # Begründung
 Die meisten Tests laufen schnell auf der JVM. Der Vertragstest stellt sicher, dass beide Seiten

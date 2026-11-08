@@ -8,7 +8,7 @@ import com.lemonappdev.konsist.api.verify.assertFalse
 import com.lemonappdev.konsist.api.verify.assertTrue
 import org.junit.Test
 
-/** Prüft die Regeln aus ADR 003 und ADR 004. */
+/** Prüft die Regeln aus ADR 003 und ADR 004. Ein fehlschlagender Test nennt die betroffene Datei. */
 class ArchitekturTest {
     private val produktion = Konsist.scopeFromProduction()
 
@@ -18,6 +18,16 @@ class ArchitekturTest {
             .filter { it.packagee?.name?.startsWith("com.iu.radio_app.data") == true }
             .flatMap { it.imports }
             .assertFalse(strict = false) { it.name.startsWith("com.iu.radio_app.ui") }
+    }
+
+    @Test
+    fun `Domaenenmodell ist reines Kotlin ohne Abhaengigkeiten`() {
+        val verboten =
+            listOf("com.iu.radio_app.data", "com.iu.radio_app.ui", "android", "androidx", "com.google")
+        produktion.files
+            .filter { it.packagee?.name?.startsWith("com.iu.radio_app.model") == true }
+            .flatMap { it.imports }
+            .assertFalse(strict = false) { import -> verboten.any { import.name.startsWith("$it.") } }
     }
 
     @Test
