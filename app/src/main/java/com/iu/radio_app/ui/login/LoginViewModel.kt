@@ -2,7 +2,10 @@ package com.iu.radio_app.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.annotation.StringRes
+import com.iu.radio_app.R
 import com.iu.radio_app.data.auth.AuthRepository
+import com.iu.radio_app.data.auth.InvalidCredentialsException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,11 +43,18 @@ class LoginViewModel
                 authRepository
                     .signIn(current.email.trim(), current.password)
                     .onSuccess { state.update { it.copy(isLoading = false, password = "") } }
-                    .onFailure { error -> state.update { it.copy(isLoading = false, errorMessage = error.message) } }
+                    .onFailure { error -> state.update { it.copy(isLoading = false, errorMessage = error.toMessage()) } }
             }
         }
 
         fun signOut() {
             viewModelScope.launch { authRepository.signOut() }
         }
+
+        @StringRes
+        private fun Throwable.toMessage(): Int =
+            when (this) {
+                is InvalidCredentialsException -> R.string.login_error_invalid_credentials
+                else -> R.string.login_error_unknown
+            }
     }

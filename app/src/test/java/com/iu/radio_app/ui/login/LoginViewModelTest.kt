@@ -7,6 +7,7 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.iu.radio_app.MainDispatcherRule
+import com.iu.radio_app.R
 import com.iu.radio_app.data.auth.FakeAuthRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
@@ -65,8 +66,19 @@ class LoginViewModelTest {
             viewModel.signIn()
 
             val state = viewModel.uiState.value
-            assertThat(state.errorMessage).isEqualTo("E-Mail oder Passwort ist falsch")
+            assertThat(state.errorMessage).isEqualTo(R.string.login_error_invalid_credentials)
             assertThat(state.signedInAs).isNull()
+        }
+
+    @Test
+    fun `unbekannter Fehler zeigt eine allgemeine Fehlermeldung`() =
+        runTest {
+            repository.failNextSignInWith = IllegalStateException("Netzwerk weg")
+            fillIn("test@radio.app", "passwort")
+
+            viewModel.signIn()
+
+            assertThat(viewModel.uiState.value.errorMessage).isEqualTo(R.string.login_error_unknown)
         }
 
     @Test

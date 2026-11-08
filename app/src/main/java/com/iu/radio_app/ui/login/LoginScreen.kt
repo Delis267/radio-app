@@ -16,12 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iu.radio_app.R
 import com.iu.radio_app.ui.theme.RadioappTheme
 
 /** Verbindet den Bildschirm mit dem ViewModel. */
@@ -57,16 +59,16 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (state.signedInAs != null) {
-            Text("Angemeldet als ${state.signedInAs}", style = MaterialTheme.typography.titleMedium)
-            Button(onClick = onSignOut) { Text("Abmelden") }
+            Text(stringResource(R.string.login_signed_in_as, state.signedInAs), style = MaterialTheme.typography.titleMedium)
+            Button(onClick = onSignOut) { Text(stringResource(R.string.login_sign_out)) }
             return@Column
         }
 
-        Text("Anmelden", style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.login_title), style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(
             value = state.email,
             onValueChange = onEmailChange,
-            label = { Text("E-Mail") },
+            label = { Text(stringResource(R.string.login_email_label)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
@@ -74,14 +76,14 @@ fun LoginScreen(
         OutlinedTextField(
             value = state.password,
             onValueChange = onPasswordChange,
-            label = { Text("Passwort") },
+            label = { Text(stringResource(R.string.login_password_label)) },
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(),
         )
         state.errorMessage?.let {
-            Text(it, color = MaterialTheme.colorScheme.error)
+            Text(stringResource(it), color = MaterialTheme.colorScheme.error)
         }
         Button(
             onClick = onSignIn,
@@ -91,7 +93,7 @@ fun LoginScreen(
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
             } else {
-                Text("Anmelden")
+                Text(stringResource(R.string.login_submit))
             }
         }
     }
@@ -102,7 +104,7 @@ fun LoginScreen(
 private fun LoginScreenPreview() {
     RadioappTheme {
         LoginScreen(
-            state = LoginUiState(email = "demo@radio.app", errorMessage = "E-Mail oder Passwort ist falsch"),
+            state = LoginUiState(email = "demo@radio.app", errorMessage = R.string.login_error_invalid_credentials),
             onEmailChange = {},
             onPasswordChange = {},
             onSignIn = {},

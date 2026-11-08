@@ -18,6 +18,9 @@ class FakeAuthRepository(
     /** Wenn gesetzt, wartet [signIn], bis der Test es freigibt. */
     var pendingSignIn: CompletableDeferred<Unit>? = null
 
+    /** Wenn gesetzt, scheitert `signIn` mit genau diesem Fehler. */
+    var failNextSignInWith: Throwable? = null
+
     override val currentUser: StateFlow<User?> = user
 
     override suspend fun signIn(
@@ -25,6 +28,7 @@ class FakeAuthRepository(
         password: String,
     ): Result<User> {
         pendingSignIn?.await()
+        failNextSignInWith?.let { return Result.failure(it) }
         if (email != validEmail || password != validPassword) {
             return Result.failure(InvalidCredentialsException())
         }
