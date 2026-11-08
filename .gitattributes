@@ -1,0 +1,13 @@
+# Zeilenenden im Repo und in der Arbeitskopie einheitlich LF, unabhängig von core.autocrlf
+* text=auto eol=lf
+
+# Windows-Skripte brauchen CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binärdateien nie anfassen
+*.jar binary
+*.png binary
+*.webp binary
+*.jpg binary
+*.jpeg binary

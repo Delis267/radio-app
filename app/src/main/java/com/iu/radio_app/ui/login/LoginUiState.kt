@@ -8,7 +8,6 @@ data class LoginUiState(
     val isLoading: Boolean = false,
     /** Ressourcen-ID statt Text, damit das ViewModel ohne `Context` auskommt. */
     @StringRes val errorMessage: Int? = null,
-    val signedInAs: String? = null,
 ) {
     val canSubmit: Boolean
         get() = email.isNotBlank() && password.isNotBlank() && !isLoading
