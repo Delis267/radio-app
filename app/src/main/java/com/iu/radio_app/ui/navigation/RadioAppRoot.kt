@@ -31,8 +31,12 @@ import com.iu.radio_app.ui.songrequest.SongRequestRoute
 @Composable
 fun RadioAppRoot(viewModel: SessionViewModel = hiltViewModel()) {
     val isSignedIn by viewModel.isSignedIn.collectAsStateWithLifecycle()
-    when (isSignedIn) {
-        true -> MainNavigation()
+    // isSignedIn ausgeschaltet fürs testen.
+    when (true) {
+        true -> {
+            System.err.println("Achtung! Login ist manuell deaktiviert.")
+            MainNavigation()
+        }
         false -> Scaffold(modifier = Modifier.fillMaxSize()) { padding -> LoginRoute(Modifier.padding(padding)) }
         null -> Unit
     }
