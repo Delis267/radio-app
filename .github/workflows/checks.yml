@@ -17,34 +17,16 @@ jobs:
           java-version: 25
       - uses: gradle/actions/setup-gradle@v6
 
-      - name: Android und Kotlin -Lint ausführen
-        run: ./gradlew lintDebug ktlintCheck --continue
+      # Schlägt nur bei Befunden der Schwere Error fehl, Warnungen stehen im Bericht
+      - name: Android Lint ausführen
+        run: ./gradlew lintDebug
 
-      - uses: reviewdog/action-setup@v1
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-
-      - name: Findings in GitHub posten
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          for f in app/build/reports/ktlint/*Check/*.xml; do
-            [ -f "$f" ] && reviewdog -f=checkstyle -name=ktlint \
-              -reporter=github-pr-annotations -fail-level=none < "$f"
-          done
-          f=app/build/reports/lint-results-debug.sarif
-          [ -f "$f" ] && reviewdog -f=sarif -name=android-lint \
-            -reporter=github-pr-annotations -fail-level=none < "$f"
-          true
-
-      - name: Lint report hochladen
+      - name: Lint-Bericht hochladen
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: lint-berichte
-          path: |
-            app/build/reports/lint-results-debug.*
-            app/build/reports/ktlint/
+          name: lint-bericht
+          path: app/build/reports/lint-results-debug.html
 
   build-and-test:
     name: Build & Test
@@ -61,11 +43,13 @@ jobs:
       - name: build & test
         run: ./gradlew assembleDebug testDebugUnitTest createDebugUnitTestCoverageReport --continue
 
-      - name: Testergebnisse in der Zusammenfassung melden
+      # Ein Kommentar pro PR, wird bei jedem Push aktualisiert
+      - name: Testergebnisse im PR kommentieren
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         uses: mikepenz/action-junit-report@v6
         with:
           annotate_only: true
+          comment: true
           report_paths: app/build/test-results/**/*.xml
           include_passed: false
 

@@ -2,7 +2,7 @@
 - Dependency Injection mit Hilt über KSP (kein kapt).
 - Nebenläufigkeit mit Coroutines und Flow, UI-Zustand als `StateFlow`, gesammelt mit `collectAsStateWithLifecycle()`.
 - Tests mit JUnit 4, Assertions mit AssertK, Fakes statt Mock-Framework.
-- Statische Analyse mit Android Lint und ktlint, die CI zeigt Befunde als Annotationen an der Zeile.
+- Statische Analyse nur mit Android Lint, die CI schlägt nur bei Befunden der Schwere Error fehl. Kein ktlint.
 - Veraltete Versionen im Versionskatalog werden beim Einrichten mit aktualisiert.
 
 # Begründung

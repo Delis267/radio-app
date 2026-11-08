@@ -8,7 +8,6 @@ lifecycleRuntimeKtx = "2.11.0"
 activityCompose = "1.13.0"
 kotlin = "2.4.21"
 composeBom = "2026.09.00"
-ktlint = "14.2.0"
 konsist = "0.18.1"
 hilt = "2.60.1"
 hiltAndroidx = "1.4.0"
@@ -44,7 +43,6 @@ assertk = { group = "com.willowtreeapps.assertk", name = "assertk", version.ref 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
