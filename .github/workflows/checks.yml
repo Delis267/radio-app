@@ -17,15 +17,13 @@ jobs:
           java-version: 25
       - uses: gradle/actions/setup-gradle@v6
 
-      # Android Lint (Android-Regeln) und ktlint (Kotlin-Stil)
-      - name: Lint und ktlint ausführen
+      - name: Android und Kotlin -Lint ausführen
         run: ./gradlew lintDebug ktlintCheck --continue
 
       - uses: reviewdog/action-setup@v1
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
 
-      # Befunde als Annotationen an diesem Job, nur für geänderte Zeilen
-      - name: Befunde an den Zeilen anzeigen
+      - name: Findings in GitHub posten
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -39,7 +37,7 @@ jobs:
             -reporter=github-pr-annotations -fail-level=none < "$f"
           true
 
-      - name: Berichte hochladen
+      - name: Lint report hochladen
         if: failure()
         uses: actions/upload-artifact@v7
         with:
@@ -60,7 +58,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       # Unit-, Architektur- und Robolectric-Tests
-      - name: Bauen und testen
+      - name: build & test
         run: ./gradlew assembleDebug testDebugUnitTest createDebugUnitTestCoverageReport --continue
 
       - name: Testergebnisse in der Zusammenfassung melden

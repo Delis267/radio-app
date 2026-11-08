@@ -12,3 +12,4 @@ abstract class AuthModule {
     @Binds
     abstract fun bindAuthRepository(impl: StubAuthRepository): AuthRepository
 }
+
