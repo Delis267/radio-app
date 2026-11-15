@@ -6,8 +6,18 @@
     <string name="login_email_label">E-Mail</string>
     <string name="login_password_label">Passwort</string>
     <string name="login_submit">Anmelden</string>
-    <string name="login_signed_in_as">Angemeldet als %1$s</string>
-    <string name="login_sign_out">Abmelden</string>
     <string name="login_error_invalid_credentials">E-Mail oder Passwort ist falsch</string>
     <string name="login_error_unknown">Anmeldung fehlgeschlagen. Bitte später erneut versuchen.</string>
+
+    <!-- Navigationsleiste -->
+    <string name="nav_now_playing">Live</string>
+    <string name="nav_show">Sendung</string>
+    <string name="nav_host">Moderation</string>
+    <string name="nav_song_request">Songwunsch</string>
+
+    <!-- Bildschirmtitel -->
+    <string name="now_playing_title">Jetzt läuft</string>
+    <string name="show_title">Sendung</string>
+    <string name="host_title">Moderation</string>
+    <string name="song_request_title">Songwunsch</string>
 </resources>

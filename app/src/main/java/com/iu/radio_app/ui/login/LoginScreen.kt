@@ -26,7 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iu.radio_app.R
 import com.iu.radio_app.ui.theme.RadioappTheme
 
-/** Verbindet den Bildschirm mit dem ViewModel. */
+/** Verbindet den Bildschirm mit dem ViewModel. Nach der Anmeldung wechselt `RadioAppRoot` zur App. */
 @Composable
 fun LoginRoute(
     modifier: Modifier = Modifier,
@@ -38,7 +38,6 @@ fun LoginRoute(
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
         onSignIn = viewModel::signIn,
-        onSignOut = viewModel::signOut,
         modifier = modifier,
     )
 }
@@ -50,7 +49,6 @@ fun LoginScreen(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSignIn: () -> Unit,
-    onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -58,12 +56,6 @@ fun LoginScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        if (state.signedInAs != null) {
-            Text(stringResource(R.string.login_signed_in_as, state.signedInAs), style = MaterialTheme.typography.titleMedium)
-            Button(onClick = onSignOut) { Text(stringResource(R.string.login_sign_out)) }
-            return@Column
-        }
-
         Text(stringResource(R.string.login_title), style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(
             value = state.email,
@@ -108,7 +100,6 @@ private fun LoginScreenPreview() {
             onEmailChange = {},
             onPasswordChange = {},
             onSignIn = {},
-            onSignOut = {},
         )
     }
 }

@@ -9,6 +9,7 @@ import assertk.assertions.isTrue
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
 import com.iu.radio_app.data.auth.FakeAuthRepository
+import com.iu.radio_app.model.User
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -46,14 +47,14 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun `erfolgreiche Anmeldung zeigt die Person und leert das Passwort`() =
+    fun `erfolgreiche Anmeldung meldet die Person an und leert das Passwort`() =
         runTest {
             fillIn("test@radio.app", "passwort")
 
             viewModel.signIn()
 
             val state = viewModel.uiState.value
-            assertThat(state.signedInAs).isEqualTo("test@radio.app")
+            assertThat(repository.currentUser.value).isEqualTo(User("test@radio.app"))
             assertThat(state.password).isEmpty()
             assertThat(state.isLoading).isFalse()
         }
@@ -67,7 +68,7 @@ class LoginViewModelTest {
 
             val state = viewModel.uiState.value
             assertThat(state.errorMessage).isEqualTo(R.string.login_error_invalid_credentials)
-            assertThat(state.signedInAs).isNull()
+            assertThat(repository.currentUser.value).isNull()
         }
 
     @Test
@@ -104,16 +105,5 @@ class LoginViewModelTest {
             viewModel.onPasswordChange("passwort")
 
             assertThat(viewModel.uiState.value.errorMessage).isNull()
-        }
-
-    @Test
-    fun `Abmelden setzt die Anzeige zurueck`() =
-        runTest {
-            fillIn("test@radio.app", "passwort")
-            viewModel.signIn()
-
-            viewModel.signOut()
-
-            assertThat(viewModel.uiState.value.signedInAs).isNull()
         }
 }
