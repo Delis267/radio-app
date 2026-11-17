@@ -8,6 +8,7 @@ app/src/main/java/com/iu/radio_app/
 ├── model/                Domänenmodell: Track, Show, SongRequest, Rating, User
 ├── ui/
 │   ├── theme/
+│   ├── components/       Bausteine, die mehrere Features nutzen
 │   └── <feature>/        Screen, ViewModel, UiState
 └── data/
     └── <topic>/          <Topic>Repository (Interface), Stub-/Firestore-Implementierung, ggf. DTOs
@@ -16,6 +17,7 @@ app/src/main/java/com/iu/radio_app/
 - Code ist englisch, die Fachsprache deutsch. `GLOSSARY.md` ordnet die Begriffe einander zu.
 - `model/` enthält reine Kotlin-Klassen ohne Android, Firebase und Abhängigkeiten auf `data/` oder `ui/`.
   Kleine Fachlogik direkt am Modell ist erlaubt.
+- Bausteine, die mehrere Features nutzen, liegen in `ui/components/`, damit Features nicht voneinander abhängen.
 - Repository-Interfaces liegen in `data/<topic>/`, neben ihren Implementierungen.
 - Repositories liefern `Flow` und Modelle aus `model/`, Firebase-Typen und DTOs verlassen `data/` nicht.
 - Ein eigener UiState-Typ für Daten entsteht nur, wenn der Bildschirm sie aufbereitet anzeigt.
