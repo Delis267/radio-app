@@ -16,7 +16,7 @@ sealed interface Destination : NavKey {
     data object Show : Destination
 
     @Serializable
-    data object Host : Destination
+    data object HostProfile : Destination
 
     @Serializable
     data object SongRequest : Destination
@@ -31,5 +31,5 @@ enum class TopLevelDestination(
     NOW_PLAYING(Destination.NowPlaying, R.string.nav_now_playing, R.drawable.ic_radio),
     SONG_REQUEST(Destination.SongRequest, R.string.nav_song_request, R.drawable.ic_heart),
     SHOW(Destination.Show, R.string.nav_show, R.drawable.ic_list_music),
-    HOST(Destination.Host, R.string.nav_host, R.drawable.ic_mic),
+    HOST_PROFILE(Destination.HostProfile, R.string.nav_host, R.drawable.ic_mic),
 }

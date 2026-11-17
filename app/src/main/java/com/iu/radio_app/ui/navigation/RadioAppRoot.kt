@@ -36,11 +36,11 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.iu.radio_app.R
-import com.iu.radio_app.ui.host.HostRoute
+import com.iu.radio_app.ui.listener.hostprofile.HostProfileRoute
+import com.iu.radio_app.ui.listener.nowplaying.NowPlayingRoute
+import com.iu.radio_app.ui.listener.show.ShowRoute
+import com.iu.radio_app.ui.listener.songrequest.SongRequestRoute
 import com.iu.radio_app.ui.login.LoginRoute
-import com.iu.radio_app.ui.nowplaying.NowPlayingRoute
-import com.iu.radio_app.ui.show.ShowRoute
-import com.iu.radio_app.ui.songrequest.SongRequestRoute
 
 /** Einstieg der UI: Login, solange niemand angemeldet ist, danach die App mit Navigationsleiste. */
 @Composable
@@ -79,7 +79,7 @@ private fun MainNavigation() {
                 entryProvider {
                     entry<Destination.NowPlaying> { NowPlayingRoute() }
                     entry<Destination.Show> { ShowRoute() }
-                    entry<Destination.Host> { HostRoute() }
+                    entry<Destination.HostProfile> { HostProfileRoute() }
                     entry<Destination.SongRequest> { SongRequestRoute() }
                 },
         )

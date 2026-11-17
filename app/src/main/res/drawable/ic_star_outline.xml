@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <!-- Innenkontur wie in Figma: Strich 3 auf den Stern zugeschnitten -->
+    <group>
+        <clip-path android:pathData="M24 6L29.562 17.8486L42 19.7603L33 28.9779L35.124 42L24 35.8486L12.876 42L15 28.9779L6 19.7603L18.438 17.8486L24 6Z" />
+        <path
+            android:pathData="M24 6L29.562 17.8486L42 19.7603L33 28.9779L35.124 42L24 35.8486L12.876 42L15 28.9779L6 19.7603L18.438 17.8486L24 6Z"
+            android:strokeWidth="3"
+            android:strokeColor="#CF431F" />
+    </group>
+</vector>

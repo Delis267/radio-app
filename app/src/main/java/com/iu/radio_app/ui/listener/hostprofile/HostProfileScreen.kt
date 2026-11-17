@@ -1,4 +1,4 @@
-package com.iu.radio_app.ui.host
+package com.iu.radio_app.ui.listener.hostprofile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,7 +46,7 @@ private const val PLACEHOLDER_RATING = 4
 
 /** Prototyp des Bildschirms „Moderation“, die Elemente haben noch keine Funktion. */
 @Composable
-fun HostRoute(modifier: Modifier = Modifier) {
+fun HostProfileRoute(modifier: Modifier = Modifier) {
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         LiveHeader()
         AboutSection()
