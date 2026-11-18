@@ -1,4 +1,4 @@
-package com.iu.radio_app.ui.host
+package com.iu.radio_app.ui.listener.hostprofile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +12,7 @@ import com.iu.radio_app.R
 
 /** Platzhalter, bis der Bildschirm „Moderation“ umgesetzt ist. */
 @Composable
-fun HostRoute(modifier: Modifier = Modifier) {
+fun HostProfileRoute(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(stringResource(R.string.host_title), style = MaterialTheme.typography.headlineMedium)
     }

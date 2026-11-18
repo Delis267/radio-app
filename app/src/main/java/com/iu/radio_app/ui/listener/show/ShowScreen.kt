@@ -1,4 +1,4 @@
-package com.iu.radio_app.ui.songrequest
+package com.iu.radio_app.ui.listener.show
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,10 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.iu.radio_app.R
 
-/** Platzhalter, bis der Bildschirm „Songwunsch“ umgesetzt ist. */
+/** Platzhalter, bis der Bildschirm „Sendung“ umgesetzt ist. */
 @Composable
-fun SongRequestRoute(modifier: Modifier = Modifier) {
+fun ShowRoute(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(stringResource(R.string.song_request_title), style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.show_title), style = MaterialTheme.typography.headlineMedium)
     }
 }
