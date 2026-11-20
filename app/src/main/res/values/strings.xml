@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">radio-app</string>
 
     <!-- Login -->
@@ -31,8 +31,15 @@
     <string name="host_about">Über %1$s</string>
     <string name="host_feedback_title">Gefällt dir der Stil von %1$s?</string>
     <string name="host_feedback_subtitle">Unsere Moderator:innen freuen sich über dein Feedback</string>
-    <!-- „von 5 Sternen“ ist für jede Zahl gleich, daher kein plurals -->
-    <string name="host_rating_star" tools:ignore="PluralsCandidate">%1$d von 5 Sternen</string>
     <string name="host_feedback_opinion">Deine Meinung</string>
     <string name="host_feedback_submit">Moderation bewerten</string>
+    <plurals name="rating_star">
+        <item quantity="one">Mit %1$d Stern bewerten</item>
+        <item quantity="other">Mit %1$d Sternen bewerten</item>
+    </plurals>
+    <!-- rating_submitted kann gelöscht werden wenn Schnittstelle vorhanden (dient gerade nur als Feedback für den Button-Klick) -->
+    <plurals name="rating_submitted">
+        <item quantity="one">Bewertet mit %1$d Stern</item>
+        <item quantity="other">Bewertet mit %1$d Sternen</item>
+    </plurals>
 </resources>
