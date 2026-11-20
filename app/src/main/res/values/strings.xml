@@ -25,18 +25,20 @@
     <string name="logo_description">FUNK</string>
     <string name="sign_out">Abmelden</string>
 
+    <!-- Komponenten -->
+    <string name="live_tag_default">Live</string>
+    <plurals name="rating_star">
+        <item quantity="one">Mit %1$d Stern bewerten</item>
+        <item quantity="other">Mit %1$d Sternen bewerten</item>
+    </plurals>
+
     <!-- Moderation -->
-    <string name="host_live">● LIVE</string>
     <string name="host_photo_description">Foto von %1$s</string>
     <string name="host_about">Über %1$s</string>
     <string name="host_feedback_title">Gefällt dir der Stil von %1$s?</string>
     <string name="host_feedback_subtitle">Unsere Moderator:innen freuen sich über dein Feedback</string>
     <string name="host_feedback_opinion">Deine Meinung</string>
     <string name="host_feedback_submit">Moderation bewerten</string>
-    <plurals name="rating_star">
-        <item quantity="one">Mit %1$d Stern bewerten</item>
-        <item quantity="other">Mit %1$d Sternen bewerten</item>
-    </plurals>
     <!-- rating_submitted kann gelöscht werden wenn Schnittstelle vorhanden (dient gerade nur als Feedback für den Button-Klick) -->
     <plurals name="rating_submitted">
         <item quantity="one">Bewertet mit %1$d Stern</item>

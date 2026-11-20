@@ -2,8 +2,6 @@ package com.iu.radio_app.ui.listener.hostprofile
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -29,13 +25,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.iu.radio_app.R
 import com.iu.radio_app.ui.components.HeroContainer
 import com.iu.radio_app.ui.components.HeroTitle
+import com.iu.radio_app.ui.components.LiveTag
 import com.iu.radio_app.ui.components.PrimaryButton
+import com.iu.radio_app.ui.components.ScreenWithBottomSection
 import com.iu.radio_app.ui.components.StarRating
 
 // Platzhalter, bis Moderator:innen aus der Datenschicht kommen
@@ -48,10 +45,9 @@ private const val HOST_BIO =
 /** Prototyp des Bildschirms „Moderation“, die Elemente haben noch keine Funktion. */
 @Composable
 fun HostProfileRoute(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+    ScreenWithBottomSection(bottom = { FeedbackSection() }, modifier = modifier) {
         LiveHeader()
         AboutSection()
-        FeedbackSection()
     }
 }
 
@@ -60,11 +56,7 @@ private fun LiveHeader() {
     HeroContainer {
         Row {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    stringResource(R.string.host_live),
-                    color = MaterialTheme.colorScheme.inversePrimary,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.4.sp),
-                )
+                LiveTag()
                 Spacer(Modifier.height(12.dp))
                 HeroTitle(HOST_NAME, showLine = true)
                 Spacer(Modifier.height(14.dp))
@@ -99,40 +91,31 @@ private fun FeedbackSection() {
     var rating by rememberSaveable { mutableStateOf<Int?>(null) }
     val context = LocalContext.current
     val resources = LocalResources.current
-    Column(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-                .padding(horizontal = 20.dp, vertical = 25.dp),
-        verticalArrangement = Arrangement.spacedBy(11.dp),
-    ) {
-        Text(stringResource(R.string.host_feedback_title, HOST_FIRST_NAME), style = MaterialTheme.typography.titleMedium)
-        Text(stringResource(R.string.host_feedback_subtitle), style = MaterialTheme.typography.bodyMedium)
-        StarRating(
-            rating = rating,
-            onRate = { stars ->
-                rating = stars
-                // Prototyp: Toast statt Speichern
-                val message = resources.getQuantityString(R.plurals.rating_submitted, stars, stars)
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            },
-        )
-        TextField(
-            value = opinion,
-            onValueChange = { opinion = it },
-            label = { Text(stringResource(R.string.host_feedback_opinion)) },
-            colors =
-                TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-                ),
-            modifier = Modifier.fillMaxWidth(),
-        )
-        PrimaryButton(
-            text = stringResource(R.string.host_feedback_submit),
-            onClick = {},
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
+    Text(stringResource(R.string.host_feedback_title, HOST_FIRST_NAME), style = MaterialTheme.typography.titleMedium)
+    Text(stringResource(R.string.host_feedback_subtitle), style = MaterialTheme.typography.bodyMedium)
+    StarRating(
+        rating = rating,
+        onRate = { stars ->
+            rating = stars
+            // Prototyp: Toast statt Speichern
+            val message = resources.getQuantityString(R.plurals.rating_submitted, stars, stars)
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        },
+    )
+    TextField(
+        value = opinion,
+        onValueChange = { opinion = it },
+        label = { Text(stringResource(R.string.host_feedback_opinion)) },
+        colors =
+            TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+            ),
+        modifier = Modifier.fillMaxWidth(),
+    )
+    PrimaryButton(
+        text = stringResource(R.string.host_feedback_submit),
+        onClick = {},
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
