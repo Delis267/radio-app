@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -22,6 +22,12 @@ android {
         versionName = providers.gradleProperty("versionName").getOrElse("0.1.0-dev")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Backend wählen (ADR 003), Standardwerte in gradle.properties, lokal überschreibbar mit -P oder ~/.gradle/gradle.properties
+        val useStubs = providers.gradleProperty("radio.stubs").getOrElse("false").toBoolean()
+        val firestoreEmulator = providers.gradleProperty("radio.firestoreEmulator").getOrElse("")
+        buildConfigField("boolean", "USE_STUBS", useStubs.toString())
+        buildConfigField("String", "FIRESTORE_EMULATOR", "\"$firestoreEmulator\"")
     }
 
     // Signatur nur, wenn die Release-Pipeline die Secrets setzt
@@ -57,6 +63,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     // android.util.Log in den Stubs liefert in lokalen Tests nur Standardwerte statt einer Exception
     testOptions {
@@ -65,8 +72,6 @@ android {
 }
 
 dependencies {
-    implementation(platform("com.google.firebase:firebase-bom:35.2.0"))
-    implementation("com.google.firebase:firebase-analytics")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -79,6 +84,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.viewmodel.compose)
@@ -94,6 +102,8 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.assertk)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Sicherheitsregeln für Firestore (ADR 003). Deployen mit: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Programm ist öffentlich lesbar, geschrieben wird es vorerst nur über die Firebase Console
+    match /station/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /shows/{showId} {
+      allow read: if true;
+      allow write: if false;
+
+      match /playlist/{entry} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
+    // Alles andere ist gesperrt, bis es eine eigene Regel bekommt
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

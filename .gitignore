@@ -3,6 +3,7 @@
 build/
 !gradle/wrapper/gradle-wrapper.jar
 .kotlin/
+tools/firestore-seed/node_modules
 
 # ── Lokale Konfiguration ─────────────────────────────
 # enthält den SDK-Pfad des eigenen Rechners
@@ -35,3 +36,8 @@ keystore.properties
 .DS_Store
 Thumbs.db
 desktop.in
+# ── Firebase Emulator ────────────────────────────────
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebase/
