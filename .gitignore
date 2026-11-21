@@ -4,6 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 .kotlin/
 tools/firestore-seed/node_modules
+firebase-debug.log
 
 # ── Lokale Konfiguration ─────────────────────────────
 # enthält den SDK-Pfad des eigenen Rechners
