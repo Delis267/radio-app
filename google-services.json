@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1063628895949",
+    "project_id": "radio-app-iu",
+    "storage_bucket": "radio-app-iu.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1063628895949:android:c0557d06af90a5e1511b84",
+        "android_client_info": {
+          "package_name": "com.iu.radio_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhIYLRwjV61NOZL3cMz76iLNDNczFQOJQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
