@@ -12,6 +12,7 @@ interface RatingRepository {
     suspend fun rate(
         target: RatingTarget,
         stars: Int,
+        comment: String? = null,
     ): Result<Unit>
 
     fun summary(target: RatingTarget): Flow<RatingSummary>

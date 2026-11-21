@@ -39,9 +39,8 @@
     <string name="host_feedback_subtitle">Unsere Moderator:innen freuen sich über dein Feedback</string>
     <string name="host_feedback_opinion">Deine Meinung</string>
     <string name="host_feedback_submit">Moderation bewerten</string>
-    <!-- rating_submitted kann gelöscht werden wenn Schnittstelle vorhanden (dient gerade nur als Feedback für den Button-Klick) -->
-    <plurals name="rating_submitted">
-        <item quantity="one">Bewertet mit %1$d Stern</item>
-        <item quantity="other">Bewertet mit %1$d Sternen</item>
-    </plurals>
+    <!-- Prototyp: Rückmeldung als Toast -->
+    <string name="host_rating_saved">Bewertung gespeichert</string>
+    <string name="host_feedback_saved">Danke für dein Feedback</string>
+    <string name="host_rating_failed">Bewertung konnte nicht gespeichert werden</string>
 </resources>
