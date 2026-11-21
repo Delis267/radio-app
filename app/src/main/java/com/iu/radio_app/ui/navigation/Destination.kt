@@ -22,14 +22,14 @@ sealed interface Destination : NavKey {
     data object SongRequest : Destination
 }
 
-/** Die Tabs der unteren Navigationsleiste, in der Reihenfolge der Wireframes. */
+/** Die Tabs der unteren Navigationsleiste, in der Reihenfolge des Figma-Designs. */
 enum class TopLevelDestination(
     val destination: Destination,
     @param:StringRes val label: Int,
     @param:DrawableRes val icon: Int,
 ) {
-    NOW_PLAYING(Destination.NowPlaying, R.string.nav_now_playing, R.drawable.ic_sensors),
-    SHOW(Destination.Show, R.string.nav_show, R.drawable.ic_queue_music),
+    NOW_PLAYING(Destination.NowPlaying, R.string.nav_now_playing, R.drawable.ic_radio),
+    SONG_REQUEST(Destination.SongRequest, R.string.nav_song_request, R.drawable.ic_heart),
+    SHOW(Destination.Show, R.string.nav_show, R.drawable.ic_list_music),
     HOST_PROFILE(Destination.HostProfile, R.string.nav_host, R.drawable.ic_mic),
-    SONG_REQUEST(Destination.SongRequest, R.string.nav_song_request, R.drawable.ic_favorite),
 }

@@ -20,4 +20,27 @@
     <string name="show_title">Sendung</string>
     <string name="host_title">Moderation</string>
     <string name="song_request_title">Songwunsch</string>
+
+    <!-- Kopfzeile -->
+    <string name="logo_description">FUNK</string>
+    <string name="sign_out">Abmelden</string>
+
+    <!-- Komponenten -->
+    <string name="live_tag_default">Live</string>
+    <plurals name="rating_star">
+        <item quantity="one">Mit %1$d Stern bewerten</item>
+        <item quantity="other">Mit %1$d Sternen bewerten</item>
+    </plurals>
+
+    <!-- Moderation -->
+    <string name="host_photo_description">Foto von %1$s</string>
+    <string name="host_about">Über %1$s</string>
+    <string name="host_feedback_title">Gefällt dir der Stil von %1$s?</string>
+    <string name="host_feedback_subtitle">Unsere Moderator:innen freuen sich über dein Feedback</string>
+    <string name="host_feedback_opinion">Deine Meinung</string>
+    <string name="host_feedback_submit">Moderation bewerten</string>
+    <!-- Prototyp: Rückmeldung als Toast -->
+    <string name="host_rating_saved">Bewertung gespeichert</string>
+    <string name="host_feedback_saved">Danke für dein Feedback</string>
+    <string name="host_rating_failed">Bewertung konnte nicht gespeichert werden</string>
 </resources>
