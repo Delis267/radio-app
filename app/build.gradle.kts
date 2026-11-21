@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -5,6 +7,22 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
+}
+
+/**
+ * Liest eine Einstellung der App. Reihenfolge: `-P` bzw. `~/.gradle/gradle.properties`, dann `local.properties`
+ * im Projekt (nicht eingecheckt, je Person), sonst [default].
+ */
+fun radioSetting(
+    name: String,
+    default: String,
+): String {
+    val local =
+        providers
+            .fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+            .asText
+            .map { text -> Properties().apply { load(text.reader()) }.getProperty(name) }
+    return providers.gradleProperty(name).orElse(local).getOrElse(default).trim()
 }
 
 android {
@@ -23,9 +41,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Backend wählen (ADR 003), Standardwerte in gradle.properties, lokal überschreibbar mit -P oder ~/.gradle/gradle.properties
-        val useStubs = providers.gradleProperty("radio.stubs").getOrElse("false").toBoolean()
-        val firestoreEmulator = providers.gradleProperty("radio.firestoreEmulator").getOrElse("")
+        // Backend wählen (ADR 003), Erklärung der Einstellungen in gradle.properties
+        val useStubs = radioSetting("radio.stubs", default = "false").toBoolean()
+        val firestoreEmulator = radioSetting("radio.firestoreEmulator", default = "")
         buildConfigField("boolean", "USE_STUBS", useStubs.toString())
         buildConfigField("String", "FIRESTORE_EMULATOR", "\"$firestoreEmulator\"")
     }
