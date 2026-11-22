@@ -2,7 +2,10 @@ package com.iu.radio_app.data.radio
 
 import assertk.assertThat
 import assertk.assertions.containsExactly
+import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
+import com.iu.radio_app.model.Host
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -66,8 +69,58 @@ class SimulatedStationTest {
                 .containsExactly(SimulatedStation.CATALOG[0], SimulatedStation.CATALOG[1], SimulatedStation.CATALOG[2])
         }
 
+    @Test
+    fun `nach der Playlist der ersten Sendung folgt ohne Luecke die zweite`() =
+        runTest {
+            val station = runningStation()
+            runCurrent()
+            assertThat(station.currentShow.value.host).isEqualTo(SimulatedStation.ELISE)
+
+            advanceTimeBy(SimulatedStation.INTERVAL * ELISE_TRACKS)
+            runCurrent()
+
+            val show = station.currentShow.value
+            assertThat(show.host).isEqualTo(SimulatedStation.TOM)
+            assertThat(show.startsAt).isEqualTo(slotStart(ELISE_TRACKS))
+            assertThat(show.endsAt).isEqualTo(slotStart(SimulatedStation.CATALOG.size))
+            assertThat(station.nowPlaying.value?.track).isEqualTo(SimulatedStation.CATALOG[ELISE_TRACKS])
+        }
+
+    @Test
+    fun `Playlist einer Sendung enthaelt nur deren Titel aus der letzten Ausgabe`() =
+        runTest {
+            val station = SimulatedStation(backgroundScope, fixedClock(slotStart(ELISE_TRACKS + 2)), SimulatedStation.INTERVAL)
+            val elise = station.currentShowIdOf(SimulatedStation.ELISE)
+            val tom = station.currentShowIdOf(SimulatedStation.TOM)
+
+            assertThat(station.playlistOf(elise).first().map { it.track })
+                .isEqualTo(SimulatedStation.CATALOG.take(ELISE_TRACKS))
+            assertThat(station.playlistOf(tom).first().map { it.track })
+                .isEqualTo(SimulatedStation.CATALOG.subList(ELISE_TRACKS, ELISE_TRACKS + 3))
+        }
+
+    @Test
+    fun `Moderation ohne bisherige Ausgabe hat noch keine Sendungen`() =
+        runTest {
+            val station = SimulatedStation(backgroundScope, fixedClock(slotStart(1)), SimulatedStation.INTERVAL)
+
+            assertThat(station.showsOf(SimulatedStation.TOM.id).first()).isEmpty()
+            assertThat(station.showsOf(SimulatedStation.ELISE.id).first().map { it.startsAt })
+                .containsExactly(SimulatedStation.PROGRAM_START)
+        }
+
+    /** ID der Sendung von [host], abgelesen aus den letzten Ausgaben. */
+    private suspend fun SimulatedStation.currentShowIdOf(host: Host): String = showsOf(host.id).first().single().id
+
+    private fun slotStart(slot: Int): Instant = SimulatedStation.PROGRAM_START + SimulatedStation.INTERVAL * slot
+
     private fun fixedClock(now: Instant): Clock =
         object : Clock {
             override fun now(): Instant = now
         }
+
+    private companion object {
+        /** Länge der Playlist von Elise, die als erste Sendung läuft. */
+        const val ELISE_TRACKS = 5
+    }
 }

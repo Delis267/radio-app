@@ -2,16 +2,19 @@
 Die App ist eine Companion-App zu einem Sender, den es nicht gibt. Wir trennen die Daten des Senders von den Daten der App:
 
 - **Senderdaten stehen fest im Code**, im simulierten Sender unter `data/radio`:
-  Katalog (`Track`), Sendungen mit Moderation (`Show`, `Host`) sowie Startzeitpunkt und Takt des Programms.
+  Sendeplan aus Sendungen mit Moderation (`Show`, `Host`) und je einer eigenen Playlist (`Track`),
+  dazu Startzeitpunkt und Takt (eine Minute je Titel). Jeder Titel gehört zu genau einer Sendung, der Katalog sind alle Titel zusammen.
   Die App liest sie nur, so wie sie es bei einem echten Sendesystem über dessen Schnittstelle täte.
 - **Den Ablauf berechnet der simulierte Sender** aus Senderdaten und Uhrzeit:
-  Ab dem Startzeitpunkt läuft der Katalog im Takt im Kreis. Daraus ergeben sich „Jetzt läuft“ und die Playlist.
-  Beides wird nirgends gespeichert, alle Geräte mit demselben Stand berechnen ohne Absprache dasselbe.
+  Ab dem Startzeitpunkt spielt jede Sendung ihre Playlist im Takt. Ist sie durch, folgt ohne Lücke die nächste Sendung,
+  nach der letzten wieder die erste. Daraus ergeben sich laufende Sendung, „Jetzt läuft“ und die Playlist.
+  Nichts davon wird gespeichert, alle Geräte mit demselben Stand berechnen ohne Absprache dasselbe.
 - Die Reihenfolge legt allein der Sender fest. Wünsche ändern sie nicht.
 - **Firestore enthält nur Daten der App** (ADR 003): `songRequests`, `suggestions` und `ratings`.
   Nur Hörer:innen schreiben, und zwar nur eigene Dokumente. Die Moderation liest nur.
 - Beide Seiten sind nur über IDs der Senderdaten verknüpft (`trackId`, `showId`, `hostId`).
-  Diese IDs ändern sich nie, neue Einträge sind jederzeit möglich. Eine wiederkehrende Sendung bekommt je Ausgabe eine eigene `showId`.
+  Diese IDs ändern sich nie, neue Einträge sind jederzeit möglich.
+  Alle Ausgaben einer Sendung teilen sich eine `showId`, bewertet wird also die Sendung als Ganzes, nicht die einzelne Ausgabe.
   Daten der App mit einer unbekannten ID werden übersprungen statt die App abstürzen zu lassen.
 - Ob ein Wunsch gespielt wurde, wird nicht gespeichert, sondern abgeleitet:
   Er gilt als gespielt, wenn sein Titel laut berechneter Playlist nach dem Zeitpunkt des Wunschs lief.
@@ -44,3 +47,7 @@ Der berechnete Ablauf ist in Tests mit fester Uhr vorhersagbar (ADR 006).
     Läuft nur, solange irgendeine App offen ist, und die Regeln müssten Clients die Senderdaten schreiben lassen.
 - Simulator mit eigenem Takt ab App-Start (wie bisher `StubRadio`).
   Einfach, aber jedes Gerät zeigt einen anderen Titel, und ob ein Wunsch gespielt wurde, hinge vom Gerät ab.
+- Sendungen zu festen Tageszeiten statt im Wechsel nach jeder Playlist. Realistischer, aber braucht eine Zeitzone
+  (`kotlinx-datetime`), und beim Testen sieht man tagsüber nur einen Teil der Sendungen.
+- Eine eigene `showId` je Ausgabe. Bewertungen ließen sich einer Ausgabe zuordnen, aber eine Ausgabe dauert nur wenige Minuten,
+  sodass jede kaum Bewertungen bekäme.

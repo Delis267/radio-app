@@ -9,22 +9,30 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 /**
  * Simulierter Sender (ADR 011): Die Senderdaten stehen fest im Code, den Ablauf berechnet er aus der Uhrzeit.
- * Ab [PROGRAM_START] läuft [CATALOG] alle [interval] einen Titel weiter im Kreis.
- * So zeigen alle Geräte mit demselben Stand ohne Absprache denselben Titel und dieselbe Playlist.
+ *
+ * Ab [PROGRAM_START] spielt jede Sendung aus [SCHEDULE] ihre Playlist, alle [interval] ein Titel.
+ * Ist die Playlist durch, folgt ohne Lücke die nächste Sendung, nach der letzten wieder die erste.
+ * So zeigen alle Geräte mit demselben Stand ohne Absprache dieselbe Sendung, denselben Titel und dieselbe Playlist.
+ *
+ * Die Zeit ist in Sendeplätze von je [interval] eingeteilt, gezählt ab [PROGRAM_START].
+ * Ein Durchlauf aller Sendungen dauert [CYCLE] Sendeplätze.
  */
 @Singleton
 class SimulatedStation(
@@ -36,39 +44,92 @@ class SimulatedStation(
     @Inject
     constructor() : this(CoroutineScope(SupervisorJob() + Dispatchers.Default), Clock.System, INTERVAL)
 
-    private val current = MutableStateFlow<PlayedTrack?>(null)
-    private val played = MutableStateFlow<List<PlayedTrack>>(emptyList())
+    private val slot = MutableStateFlow(slotAt(clock.now()))
 
-    /** Gerade laufender Titel, `null` bis der Sender zum ersten Mal gerechnet hat. */
-    val nowPlaying: StateFlow<PlayedTrack?> = current.asStateFlow()
+    /** Gerade laufender Titel. */
+    val nowPlaying: StateFlow<PlayedTrack?> = MutableStateFlow<PlayedTrack?>(trackInSlot(slot.value)).also { flow ->
+        scope.launch { slot.collect { flow.value = trackInSlot(it) } }
+    }.asStateFlow()
 
-    /** Die letzten gespielten Titel in der Reihenfolge, in der sie liefen, inklusive des laufenden. */
-    val history: StateFlow<List<PlayedTrack>> = played.asStateFlow()
+    /** Die letzten gespielten Titel über alle Sendungen, in der Reihenfolge, in der sie liefen, inklusive des laufenden. */
+    val history: StateFlow<List<PlayedTrack>> = MutableStateFlow(historyUntil(slot.value)).also { flow ->
+        scope.launch { slot.collect { flow.value = historyUntil(it) } }
+    }.asStateFlow()
+
+    /** Gerade laufende Ausgabe einer Sendung. Es läuft immer eine. */
+    val currentShow: StateFlow<Show> = MutableStateFlow(showInSlot(slot.value)).also { flow ->
+        scope.launch { slot.collect { flow.value = showInSlot(it) } }
+    }.asStateFlow()
 
     init {
         scope.launch {
             while (true) {
-                val slot = slotAt(clock.now())
-                played.value = ((slot - MAX_HISTORY + 1).coerceAtLeast(0)..slot).map(::trackInSlot)
-                current.value = trackInSlot(slot)
-                Log.i(TAG, "Jetzt läuft: ${current.value?.track?.artist} – ${current.value?.track?.title}")
-                delay(startOf(slot + 1) - clock.now())
+                val now = slotAt(clock.now())
+                slot.value = now
+                Log.i(TAG, "${showInSlot(now).title}: ${trackInSlot(now).track.artist} – ${trackInSlot(now).track.title}")
+                delay(startOf(now + 1) - clock.now())
             }
         }
     }
 
-    /** Nummer des Sendeplatzes, der zu [instant] läuft. Vor [PROGRAM_START] läuft der erste. */
+    /** Bisher gespielte Titel der letzten oder laufenden Ausgabe von [showId], inklusive des laufenden. */
+    fun playlistOf(showId: String): Flow<List<PlayedTrack>> =
+        slot.map { now -> latestEdition(showId, now)?.let { first -> (first..minOf(now, first + lengthOf(showId) - 1)) } }
+            .distinctUntilChanged()
+            .map { slots -> slots?.map(::trackInSlot).orEmpty() }
+
+    /** Letzte oder laufende Ausgabe jeder Sendung von [hostId], neueste zuerst. */
+    fun showsOf(hostId: String): Flow<List<Show>> =
+        slot.map { now ->
+            SCHEDULE
+                .filter { it.host.id == hostId }
+                .mapNotNull { plan -> latestEdition(plan.id, now)?.let(::showInSlot) }
+                .sortedByDescending { it.startsAt }
+        }.distinctUntilChanged()
+
     private fun slotAt(instant: Instant): Long =
         ((instant - PROGRAM_START).inWholeMilliseconds / interval.inWholeMilliseconds).coerceAtLeast(0)
 
     private fun startOf(slot: Long): Instant = PROGRAM_START + (interval.inWholeMilliseconds * slot).milliseconds
 
-    private fun trackInSlot(slot: Long) = PlayedTrack(CATALOG[(slot % CATALOG.size).toInt()], startOf(slot))
+    private fun trackInSlot(slot: Long): PlayedTrack = PlayedTrack(CATALOG[(slot % CYCLE).toInt()], startOf(slot))
+
+    private fun historyUntil(slot: Long): List<PlayedTrack> =
+        ((slot - MAX_HISTORY + 1).coerceAtLeast(0)..slot).map(::trackInSlot)
+
+    /** Die Ausgabe, die in [slot] läuft, mit Beginn und Ende dieser Ausgabe. */
+    private fun showInSlot(slot: Long): Show {
+        val position = (slot % CYCLE).toInt()
+        val plan = SCHEDULE.last { OFFSETS.getValue(it.id) <= position }
+        val first = slot - position + OFFSETS.getValue(plan.id)
+        return Show(plan.id, plan.title, plan.host, startOf(first), startOf(first + plan.playlist.size))
+    }
+
+    /** Erster Sendeplatz der letzten Ausgabe von [showId], die bis [now] begonnen hat, `null` wenn es noch keine gab. */
+    private fun latestEdition(
+        showId: String,
+        now: Long,
+    ): Long? {
+        val offset = OFFSETS[showId] ?: return null
+        val inThisCycle = now - now % CYCLE + offset
+        val first = if (inThisCycle <= now) inThisCycle else inThisCycle - CYCLE
+        return first.takeIf { it >= 0 }
+    }
+
+    private fun lengthOf(showId: String): Int = SCHEDULE.first { it.id == showId }.playlist.size
+
+    /** Eine Sendung im Sendeplan. Ihre Ausgaben unterscheiden sich nur in Beginn und Ende, die ID bleibt gleich. */
+    private class Plan(
+        val id: String,
+        val title: String,
+        val host: Host,
+        val playlist: List<Track>,
+    )
 
     companion object {
         // Höchstens 23 Zeichen, sonst kürzt Android den Tag unter API 26
         private const val TAG = "SimulatedStation"
-        val INTERVAL = 10.seconds
+        val INTERVAL = 1.minutes
         private const val MAX_HISTORY = 50
 
         /** Ab hier zählt der Sender. Nie ändern, sonst passt „gespielt“ nicht mehr zu bestehenden Wünschen. */
@@ -76,22 +137,7 @@ class SimulatedStation(
 
         // IDs in diesem Objekt nie ändern: Wünsche und Bewertungen in Firestore verweisen darauf (ADR 011)
 
-        /** Alle Titel, die der Sender spielt und die man sich wünschen kann. */
-        val CATALOG =
-            listOf(
-                Track("bohemian-rhapsody", "Bohemian Rhapsody", "Queen", "A Night at the Opera", 1975, null),
-                Track("dont-stop-me-now", "Don't Stop Me Now", "Queen", "Jazz", 1978, null),
-                Track("billie-jean", "Billie Jean", "Michael Jackson", "Thriller", 1982, null),
-                Track("99-luftballons", "99 Luftballons", "Nena", "Nena", 1983, null),
-                Track("major-tom", "Major Tom (Völlig losgelöst)", "Peter Schilling", "Fehler im System", 1983, null),
-                Track("rolling-in-the-deep", "Rolling in the Deep", "Adele", "21", 2010, null),
-                Track("atemlos", "Atemlos durch die Nacht", "Helene Fischer", "Farbenspiel", 2013, null),
-                Track("auf-uns", "Auf uns", "Andreas Bourani", "Hey", 2014, null),
-                Track("blinding-lights", "Blinding Lights", "The Weeknd", "After Hours", 2019, null),
-                Track("bad-guy", "bad guy", "Billie Eilish", "When We All Fall Asleep, Where Do We Go?", 2019, null),
-            )
-
-        val HOST =
+        val ELISE =
             Host(
                 id = "elise-mueller",
                 name = "Elise Müller",
@@ -101,14 +147,57 @@ class SimulatedStation(
                 photoUrl = null,
             )
 
-        /** Die einzige Sendung, sie läuft immer. */
-        val SHOW =
-            Show(
-                id = "vormittag-mit-elise",
-                title = "Vormittag mit Elise",
-                host = HOST,
-                startsAt = Instant.parse("2026-11-21T09:00:00Z"),
-                endsAt = Instant.parse("2026-11-21T12:00:00Z"),
+        // Platzhalter, bis Name und Beschreibung feststehen
+        val TOM =
+            Host(
+                id = "tom-berger",
+                name = "Tom Berger",
+                description = "Platzhalter: Beschreibung von Tom.",
+                photoUrl = null,
             )
+
+        /** Sendungen in der Reihenfolge, in der sie laufen. Jeder Titel gehört zu genau einer Sendung. */
+        private val SCHEDULE =
+            listOf(
+                Plan(
+                    id = "sendung-elise",
+                    title = "Sendung mit Elise",
+                    host = ELISE,
+                    playlist =
+                        listOf(
+                            Track("bohemian-rhapsody", "Bohemian Rhapsody", "Queen", "A Night at the Opera", 1975, null),
+                            Track("dont-stop-me-now", "Don't Stop Me Now", "Queen", "Jazz", 1978, null),
+                            Track("billie-jean", "Billie Jean", "Michael Jackson", "Thriller", 1982, null),
+                            Track("99-luftballons", "99 Luftballons", "Nena", "Nena", 1983, null),
+                            Track("major-tom", "Major Tom (Völlig losgelöst)", "Peter Schilling", "Fehler im System", 1983, null),
+                        ),
+                ),
+                Plan(
+                    id = "sendung-tom",
+                    title = "Sendung mit Tom",
+                    host = TOM,
+                    playlist =
+                        listOf(
+                            Track("rolling-in-the-deep", "Rolling in the Deep", "Adele", "21", 2010, null),
+                            Track("atemlos", "Atemlos durch die Nacht", "Helene Fischer", "Farbenspiel", 2013, null),
+                            Track("auf-uns", "Auf uns", "Andreas Bourani", "Hey", 2014, null),
+                            Track("blinding-lights", "Blinding Lights", "The Weeknd", "After Hours", 2019, null),
+                            Track("bad-guy", "bad guy", "Billie Eilish", "When We All Fall Asleep, Where Do We Go?", 2019, null),
+                        ),
+                ),
+            )
+
+        /** Alle Titel, die der Sender spielt und die man sich wünschen kann, in Sendereihenfolge. */
+        val CATALOG: List<Track> = SCHEDULE.flatMap { it.playlist }
+
+        /** Sendeplätze für einen Durchlauf aller Sendungen. */
+        private val CYCLE: Long = CATALOG.size.toLong()
+
+        /** Erster Sendeplatz jeder Sendung innerhalb eines Durchlaufs. */
+        private val OFFSETS: Map<String, Int> =
+            SCHEDULE
+                .runningFold(0) { offset, plan -> offset + plan.playlist.size }
+                .zip(SCHEDULE) { offset, plan -> plan.id to offset }
+                .toMap()
     }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.iu.radio_app.R
 import com.iu.radio_app.data.program.ProgramRepository
 import com.iu.radio_app.data.rating.RatingRepository
+import com.iu.radio_app.model.Host
 import com.iu.radio_app.model.RatingTarget
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +31,7 @@ class HostProfileViewModel
 
         init {
             viewModelScope.launch {
-                programRepository.currentShow.collect { show -> state.update { it.copy(host = show?.host) } }
+                programRepository.currentShow.collect { show -> onHostChange(show?.host) }
             }
         }
 
@@ -51,6 +52,19 @@ class HostProfileViewModel
         }
 
         fun onMessageShown() = state.update { it.copy(message = null) }
+
+        /**
+         * Die Ansicht wechselt mit der laufenden Sendung zum nächsten Host.
+         * Sterne und Meinung gehören zum vorigen Host und werden verworfen, damit sie nicht beim neuen landen.
+         */
+        private fun onHostChange(host: Host?) {
+            if (host?.id == state.value.host?.id) {
+                state.update { it.copy(host = host) }
+                return
+            }
+            savedComment = null
+            state.update { it.copy(host = host, rating = null, opinion = "") }
+        }
 
         private fun save(
             stars: Int,

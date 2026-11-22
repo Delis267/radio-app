@@ -7,10 +7,13 @@ import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
 import com.iu.radio_app.data.program.SimulatedProgramRepository
 import com.iu.radio_app.data.radio.SimulatedStation
+import com.iu.radio_app.data.radio.runningStation
 import com.iu.radio_app.data.radio.stoppedStation
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -21,7 +24,7 @@ class HostProfileViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val ratings = StubRatingRepository()
-    private val target = RatingTarget.Moderation(SimulatedStation.HOST.id)
+    private val target = RatingTarget.Moderation(SimulatedStation.ELISE.id)
     private lateinit var viewModel: HostProfileViewModel
 
     // Erst nach der Rule anlegen, sonst startet viewModelScope ohne Test-Dispatcher
@@ -29,6 +32,31 @@ class HostProfileViewModelTest {
     fun setUp() {
         viewModel = HostProfileViewModel(SimulatedProgramRepository(stoppedStation()), ratings)
     }
+
+    @Test
+    fun `wechselt mit der Sendung zum naechsten Host und verwirft dessen Eingaben`() =
+        runTest {
+            val viewModel = HostProfileViewModel(SimulatedProgramRepository(runningStation()), ratings)
+            runCurrent()
+            viewModel.onRate(4)
+            viewModel.onOpinionChange("Super Stimme")
+            viewModel.submit()
+
+            // Elises Playlist hat fünf Titel, danach läuft Toms Sendung
+            advanceTimeBy(SimulatedStation.INTERVAL * 5)
+            runCurrent()
+
+            val state = viewModel.uiState.value
+            assertThat(state.host).isEqualTo(SimulatedStation.TOM)
+            assertThat(state.rating).isNull()
+            assertThat(state.opinion).isEqualTo("")
+
+            viewModel.onRate(2)
+            val tomsRating = ratings.myRating(RatingTarget.Moderation(SimulatedStation.TOM.id)).first()
+            assertThat(tomsRating?.stars).isEqualTo(2)
+            assertThat(tomsRating?.comment).isNull()
+            assertThat(ratings.myRating(target).first()?.stars).isEqualTo(4)
+        }
 
     @Test
     fun `Sternklick speichert sofort und meldet es`() =
