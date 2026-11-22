@@ -27,6 +27,14 @@ app/src/main/java/com/iu/radio_app/
   Jede Rolle hat eigene Tabs, `RadioAppRoot` wählt die Navigation anhand der Rolle.
 - Was beide Rollen oder mehrere Features nutzen, liegt in `ui/components/`.
   Diese Composables sind zustandslos, kennen weder ViewModel noch Repository und bekommen Werte und Lambdas.
+- Ein Element wird zur Komponente, sobald es auf mehreren Screens vorkommt.
+  Änderungen passieren dann an einer Stelle, und jeder Aufruf braucht weniger Code.
+- Unterscheidet sich der Inhalt je Screen, nimmt die Komponente ihn als Slot (`@Composable`-Lambda) statt vieler Parameter,
+  z. B. `HeroContainer` und `ScreenWithBottomSection`.
+- Jede Komponente hat `modifier: Modifier = Modifier` als ersten optionalen Parameter (Compose-API-Richtlinie, Lint `ModifierParameter`).
+- Jede Komponente hat Previews ihrer echten Zustände, z. B. `StarRating` ohne und mit Bewertung.
+- Texte von Komponenten stehen in `strings.xml` in der Gruppe `<!-- Komponenten -->`, Texte eines Screens in dessen Gruppe.
+  So findet man einen Text über den Ort, an dem er erscheint.
 - `data/` und `model/` sind nach Thema geschnitten und werden von beiden Rollen geteilt.
 - Repository-Interfaces liegen in `data/<topic>/`, neben ihren Implementierungen.
 - Repositories liefern `Flow` und Modelle aus `model/`, Firebase-Typen und DTOs verlassen `data/` nicht.
@@ -46,3 +54,4 @@ Android- und Firebase-Doku sowie Now in Android nutzen genau diesen Aufbau.
 - `ui/` nur nach Feature, beide Rollen im selben Paket (z. B. `live/` mit beiden Live-Bildschirmen).
   Lohnt sich nur, wenn sich die Bildschirme ähneln, laut Wireframes tun sie das nicht.
 - Eigenes Gradle-Modul `core/designsystem` für `components/` wie in Now in Android. Erst sinnvoll mit mehreren Modulen.
+- Material-Bausteine direkt in jedem Screen, ohne eigene Komponenten. Weniger Dateien, aber gleiche Elemente laufen auseinander.
