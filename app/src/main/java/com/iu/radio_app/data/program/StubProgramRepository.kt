@@ -1,5 +1,6 @@
 package com.iu.radio_app.data.program
 
+import com.iu.radio_app.data.radio.StubRadio
 import com.iu.radio_app.model.Host
 import com.iu.radio_app.model.PlayedTrack
 import com.iu.radio_app.model.Show
@@ -9,16 +10,21 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Instant
 
-/** Datenquelle ohne Netzwerk für lokale Entwicklung (ADR 003). Später ersetzt durch Firestore. */
+/**
+ * Datenquelle ohne Netzwerk für lokale Entwicklung (ADR 003). Später ersetzt durch Firestore.
+ * Es läuft immer [SHOW], die Titel kommen von [StubRadio].
+ */
 @Singleton
 class StubProgramRepository
     @Inject
-    constructor() : ProgramRepository {
+    constructor(
+        private val radio: StubRadio,
+    ) : ProgramRepository {
         override val currentShow: Flow<Show?> = flowOf(SHOW)
 
-        override val nowPlaying: Flow<PlayedTrack?> = flowOf(null)
+        override val nowPlaying: Flow<PlayedTrack?> = radio.nowPlaying
 
-        override fun playlist(showId: String): Flow<List<PlayedTrack>> = flowOf(emptyList())
+        override fun playlist(showId: String): Flow<List<PlayedTrack>> = if (showId == SHOW.id) radio.history else flowOf(emptyList())
 
         override fun showsOf(hostId: String): Flow<List<Show>> = flowOf(if (hostId == HOST.id) listOf(SHOW) else emptyList())
 

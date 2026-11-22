@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Benachrichtigung, wenn ein eigener Songwunsch gespielt wird (ab Android 13 nötig) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:name=".RadioApp"
         android:allowBackup="true"

@@ -6,6 +6,7 @@ import assertk.assertions.isNull
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
 import com.iu.radio_app.data.program.StubProgramRepository
+import com.iu.radio_app.data.radio.stoppedRadio
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
 import kotlinx.coroutines.flow.first
@@ -25,7 +26,7 @@ class HostProfileViewModelTest {
     // Erst nach der Rule anlegen, sonst startet viewModelScope ohne Test-Dispatcher
     @Before
     fun setUp() {
-        viewModel = HostProfileViewModel(StubProgramRepository(), ratings)
+        viewModel = HostProfileViewModel(StubProgramRepository(stoppedRadio()), ratings)
     }
 
     @Test
