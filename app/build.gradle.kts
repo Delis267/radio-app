@@ -43,9 +43,7 @@ android {
 
         // Backend wählen (ADR 003), Erklärung der Einstellungen in gradle.properties
         val useStubs = radioSetting("radio.stubs", default = "false").toBoolean()
-        val firestoreEmulator = radioSetting("radio.firestoreEmulator", default = "")
         buildConfigField("boolean", "USE_STUBS", useStubs.toString())
-        buildConfigField("String", "FIRESTORE_EMULATOR", "\"$firestoreEmulator\"")
     }
 
     // Signatur nur, wenn die Release-Pipeline die Secrets setzt
@@ -120,8 +118,6 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.assertk)
-    androidTestImplementation(libs.kotlinx.coroutines.test)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

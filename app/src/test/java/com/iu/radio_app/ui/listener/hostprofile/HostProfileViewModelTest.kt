@@ -5,8 +5,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.StubProgramRepository
-import com.iu.radio_app.data.radio.stoppedRadio
+import com.iu.radio_app.data.program.SimulatedProgramRepository
+import com.iu.radio_app.data.radio.SimulatedStation
+import com.iu.radio_app.data.radio.stoppedStation
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
 import kotlinx.coroutines.flow.first
@@ -20,13 +21,13 @@ class HostProfileViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private val ratings = StubRatingRepository()
-    private val target = RatingTarget.Moderation(StubProgramRepository.HOST.id)
+    private val target = RatingTarget.Moderation(SimulatedStation.HOST.id)
     private lateinit var viewModel: HostProfileViewModel
 
     // Erst nach der Rule anlegen, sonst startet viewModelScope ohne Test-Dispatcher
     @Before
     fun setUp() {
-        viewModel = HostProfileViewModel(StubProgramRepository(stoppedRadio()), ratings)
+        viewModel = HostProfileViewModel(SimulatedProgramRepository(stoppedStation()), ratings)
     }
 
     @Test

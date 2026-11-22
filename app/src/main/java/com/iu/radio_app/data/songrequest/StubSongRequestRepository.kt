@@ -1,8 +1,8 @@
 package com.iu.radio_app.data.songrequest
 
 import android.util.Log
-import com.iu.radio_app.data.radio.StubRadio
-import com.iu.radio_app.data.radio.StubRadio.Companion.CATALOG
+import com.iu.radio_app.data.radio.SimulatedStation
+import com.iu.radio_app.data.radio.SimulatedStation.Companion.CATALOG
 import com.iu.radio_app.model.RequestedTrack
 import com.iu.radio_app.model.SongRequest
 import com.iu.radio_app.model.Track
@@ -22,15 +22,15 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
- * Datenquelle ohne Netzwerk für lokale Entwicklung (ADR 003). Später ersetzt durch Firestore.
- * Kennt nur die eigenen Wünsche, [requestedTracks] zählt daher nur diese.
- * Spielt [StubRadio] einen Titel, gelten alle offenen Wünsche dafür als gespielt (später eine Cloud Function).
+ * Datenquelle ohne Netzwerk für die Betriebsart Stubs (ADR 003). Kennt nur die eigenen Wünsche,
+ * [requestedTracks] zählt daher nur diese.
+ * Spielt [SimulatedStation] einen Titel, gelten alle offenen Wünsche dafür als gespielt (ADR 011).
  */
 @Singleton
 class StubSongRequestRepository
     @Inject
     constructor(
-        radio: StubRadio,
+        station: SimulatedStation,
     ) : SongRequestRepository {
         private val requests = MutableStateFlow<List<SongRequest>>(emptyList())
         private val suggestions = mutableListOf<String>()
@@ -40,8 +40,8 @@ class StubSongRequestRepository
         override val playedRequests: SharedFlow<SongRequest> = played.asSharedFlow()
 
         init {
-            radio.scope.launch {
-                radio.nowPlaying.filterNotNull().collect { markPlayed(it.track) }
+            station.scope.launch {
+                station.nowPlaying.filterNotNull().collect { markPlayed(it.track) }
             }
         }
 

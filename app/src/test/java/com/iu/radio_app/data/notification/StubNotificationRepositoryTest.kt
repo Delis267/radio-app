@@ -3,7 +3,7 @@ package com.iu.radio_app.data.notification
 import assertk.assertThat
 import assertk.assertions.containsExactly
 import assertk.assertions.isEmpty
-import com.iu.radio_app.data.radio.StubRadio
+import com.iu.radio_app.data.radio.SimulatedStation
 import com.iu.radio_app.model.SongRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.TestScope
@@ -17,7 +17,7 @@ class StubNotificationRepositoryTest {
     private val shown = mutableListOf<SongRequest>()
     private var appInForeground = false
     private val request =
-        SongRequest("request-1", StubRadio.CATALOG[0], Instant.parse("2026-11-21T10:00:00Z"), SongRequest.Status.PLAYED)
+        SongRequest("request-1", SimulatedStation.CATALOG[0], Instant.parse("2026-11-21T10:00:00Z"), SongRequest.Status.PLAYED)
 
     private fun TestScope.repository() = StubNotificationRepository(playedRequests, backgroundScope, { appInForeground }) { shown += it }
 

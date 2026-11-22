@@ -8,8 +8,9 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
-import com.iu.radio_app.data.radio.StubRadio
-import com.iu.radio_app.data.radio.stoppedRadio
+import com.iu.radio_app.data.radio.SimulatedStation
+import com.iu.radio_app.data.radio.runningStation
+import com.iu.radio_app.data.radio.stoppedStation
 import com.iu.radio_app.model.SongRequest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -20,7 +21,7 @@ import org.junit.Test
 
 class StubSongRequestRepositoryTest {
     // Sender steht still, nur die Tests unten spielen Titel ab
-    private val repository = StubSongRequestRepository(stoppedRadio())
+    private val repository = StubSongRequestRepository(stoppedStation())
 
     @Test
     fun `Suche findet Interpret und Titel ohne Gross- und Kleinschreibung`() =
@@ -64,7 +65,7 @@ class StubSongRequestRepositoryTest {
     @Test
     fun `gespielter Wunsch ist nicht mehr offen und wird gemeldet`() =
         runTest {
-            val radio = StubRadio(backgroundScope, StubRadio.INTERVAL)
+            val radio = runningStation()
             val repository = StubSongRequestRepository(radio)
             val played = mutableListOf<SongRequest>()
             backgroundScope.launch { repository.playedRequests.collect { played += it } }
@@ -72,7 +73,7 @@ class StubSongRequestRepositoryTest {
             repository.request("dont-stop-me-now").getOrThrow()
             repository.request("bad-guy").getOrThrow()
 
-            advanceTimeBy(StubRadio.INTERVAL)
+            advanceTimeBy(SimulatedStation.INTERVAL)
             runCurrent() // Zweiter Titel läuft: Don't Stop Me Now
 
             assertThat(repository.openRequests.first().map { it.track.id }).containsExactly("bad-guy")
@@ -83,11 +84,11 @@ class StubSongRequestRepositoryTest {
     @Test
     fun `nach dem Spielen kann man sich den Titel erneut wuenschen`() =
         runTest {
-            val radio = StubRadio(backgroundScope, StubRadio.INTERVAL)
+            val radio = runningStation()
             val repository = StubSongRequestRepository(radio)
             runCurrent()
             repository.request("dont-stop-me-now").getOrThrow()
-            advanceTimeBy(StubRadio.INTERVAL)
+            advanceTimeBy(SimulatedStation.INTERVAL)
             runCurrent()
 
             assertThat(repository.request("dont-stop-me-now").isSuccess).isTrue()
