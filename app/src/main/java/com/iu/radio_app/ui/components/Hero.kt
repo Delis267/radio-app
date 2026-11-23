@@ -90,7 +90,6 @@ fun LiveTag(
         Text(
             (text ?: stringResource(R.string.live_tag_default)).uppercase(),
             color = color,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, letterSpacing = 1.4.sp),
         )
         Spacer(Modifier.width(8.dp))
         // graphicsLayer: Alpha wird nur beim Zeichnen gelesen, die Animation löst keine Recomposition aus
