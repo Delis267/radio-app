@@ -19,4 +19,10 @@ interface SongRequestRepository {
 
     /** Alle Titel mit offenen Wünschen, meistgewünschte zuerst. */
     val requestedTracks: Flow<List<RequestedTrack>>
+
+    /** Meldet eigene Wünsche, sobald sie gespielt wurden. Nur während jemand sammelt, ohne Wiederholung. */
+    val playedRequests: Flow<SongRequest>
 }
+
+/** Der Titel ist bereits als offener Wunsch der angemeldeten Person vorhanden. */
+class AlreadyRequestedException : Exception("Track already requested")
