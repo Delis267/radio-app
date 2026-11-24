@@ -84,7 +84,14 @@ private fun MainNavigation() {
                     ),
                 entryProvider =
                     entryProvider {
-                        entry<Destination.NowPlaying> { NowPlayingRoute() }
+                        entry<Destination.NowPlaying> {
+                            NowPlayingRoute(
+                                onNavigateToSongRequest = {
+                                    backStack.clear()
+                                    backStack.add(Destination.SongRequest)
+                                },
+                            )
+                        }
                         entry<Destination.Show> { ShowRoute() }
                         entry<Destination.HostProfile> { HostProfileRoute() }
                         entry<Destination.SongRequest> { SongRequestRoute() }

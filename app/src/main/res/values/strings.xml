@@ -21,6 +21,19 @@
     <string name="host_title">Moderation</string>
     <string name="song_request_title">Dein Songwunsch</string>
 
+    <!-- Jetzt läuft -->
+    <string name="now_playing_live_tag">Jetzt läuft</string>
+    <string name="now_playing_current_song">Aktueller Song</string>
+    <string name="now_playing_rate_title">Wie gefällt dir dieser Song?</string>
+    <string name="now_playing_rate_submit">Song bewerten</string>
+    <string name="now_playing_rating_saved">Bewertung gespeichert</string>
+    <string name="now_playing_rating_failed">Bewertung konnte nicht gespeichert werden</string>
+    <string name="now_playing_album_label">Album: %1$s</string>
+    <string name="now_playing_bottom_title">Du möchtest etwas anderes hören?</string>
+    <string name="now_playing_bottom_subtitle">Reiche uns deinen Songwunsch ein!</string>
+    <string name="now_playing_bottom_button">Song wünschen</string>
+    <string name="now_playing_no_track">Gerade läuft kein Titel</string>
+
     <!-- Kopfzeile -->
     <string name="logo_description">FUNK</string>
     <string name="sign_out">Abmelden</string>
