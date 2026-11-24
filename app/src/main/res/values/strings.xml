@@ -19,7 +19,7 @@
     <string name="now_playing_title">Jetzt läuft</string>
     <string name="show_title">Sendung</string>
     <string name="host_title">Moderation</string>
-    <string name="song_request_title">Songwunsch</string>
+    <string name="song_request_title">Dein Songwunsch</string>
 
     <!-- Kopfzeile -->
     <string name="logo_description">FUNK</string>
@@ -44,4 +44,38 @@
     <string name="host_thanks_text">Deine Bewertung wurde gespeichert. Dein Feedback hilft unseren Moderator:innen dabei das Programm zu verbessern.</string>
     <string name="host_rating_failed">Bewertung konnte nicht gespeichert werden</string>
     <string name="host_rating_retry">Erneut versuchen</string>
+
+    <!-- Songwunsch -->
+    <string name="song_request_search_placeholder">Artist oder Songtitel</string>
+    <string name="song_request_search_back">Suche beenden</string>
+    <string name="song_request_search_clear">Eingabe löschen</string>
+    <string name="song_request_open_requests">Offene Wünsche</string>
+    <string name="song_request_no_open_requests">Du hast noch keine offenen Wünsche</string>
+    <string name="song_request_time">%1$s Uhr</string>
+    <plurals name="song_request_hits">
+        <item quantity="one">%1$d Treffer</item>
+        <item quantity="other">%1$d Treffer</item>
+    </plurals>
+    <string name="song_request_request_track">%1$s von %2$s wünschen</string>
+    <string name="song_request_notify_title">Benachrichtigungen aktivieren</string>
+    <string name="song_request_notify_subtitle">Wir benachrichtigen dich, wenn dein Song gespielt wird</string>
+    <string name="song_request_suggestion_title">Dein Lieblingssong ist nicht dabei?</string>
+    <string name="song_request_suggestion_expand">Vorschlag aufklappen</string>
+    <string name="song_request_suggestion_collapse">Vorschlag zuklappen</string>
+    <string name="song_request_suggestion_text">Schreib uns gerne den Interpreten und den Namen des Songs und wir prüfen, ob wir ihn ins Programm aufnehmen können</string>
+    <string name="song_request_suggestion_placeholder">Interpret, Songtitel</string>
+    <string name="song_request_suggestion_submit">Vorschlag einreichen</string>
+    <!-- Prototyp: Rückmeldung als Toast -->
+    <string name="song_request_sent">Songwunsch wurde eingereicht</string>
+    <string name="song_request_already_requested">Diesen Song hast du dir schon gewünscht</string>
+    <string name="song_request_failed">Songwunsch konnte nicht eingereicht werden</string>
+    <string name="song_request_search_failed">Suche fehlgeschlagen. Bitte später erneut versuchen.</string>
+    <string name="song_request_suggestion_sent">Vorschlag wurde eingereicht</string>
+    <string name="song_request_suggestion_failed">Vorschlag konnte nicht eingereicht werden</string>
+
+    <!-- Benachrichtigungen -->
+    <string name="notification_channel_song_requests">Songwünsche</string>
+    <string name="notification_request_played_title">Dein Songwunsch läuft gerade</string>
+    <string name="notification_request_played_text">%1$s – %2$s</string>
+    <string name="in_app_banner_close">Hinweis schließen</string>
 </resources>

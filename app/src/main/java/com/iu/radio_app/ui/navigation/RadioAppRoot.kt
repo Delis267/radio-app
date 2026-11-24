@@ -1,9 +1,12 @@
 package com.iu.radio_app.ui.navigation
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
@@ -22,6 +25,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +45,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.iu.radio_app.R
 import com.iu.radio_app.ui.listener.hostprofile.HostProfileRoute
 import com.iu.radio_app.ui.listener.nowplaying.NowPlayingRoute
+import com.iu.radio_app.ui.listener.requestplayed.RequestPlayedRoute
 import com.iu.radio_app.ui.listener.show.ShowRoute
 import com.iu.radio_app.ui.listener.songrequest.SongRequestRoute
 import com.iu.radio_app.ui.login.LoginRoute
@@ -71,24 +76,29 @@ private fun MainNavigation() {
         bottomBar = { BottomBar(backStack) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        NavDisplay(
-            backStack = backStack,
-            onBack = { backStack.removeLastOrNull() },
-            modifier = Modifier.padding(padding),
-            // Gibt jedem Ziel einen eigenen Zustand und eigene ViewModels
-            entryDecorators =
-                listOf(
-                    rememberSaveableStateHolderNavEntryDecorator(),
-                    rememberViewModelStoreNavEntryDecorator(),
-                ),
-            entryProvider =
-                entryProvider {
-                    entry<Destination.NowPlaying> { NowPlayingRoute() }
-                    entry<Destination.Show> { ShowRoute() }
-                    entry<Destination.HostProfile> { HostProfileRoute(snackbarHostState) }
-                    entry<Destination.SongRequest> { SongRequestRoute() }
-                },
-        )
+        // Edge-to-Edge: Android verkleinert das Fenster nicht mehr für die Tastatur, daher selbst Platz lassen,
+        // sonst verdeckt sie Eingabefelder und Buttons unten im Screen (z. B. Vorschlag einreichen)
+        Box(modifier = Modifier.padding(padding).consumeWindowInsets(padding).imePadding()) {
+            NavDisplay(
+                backStack = backStack,
+                onBack = { backStack.removeLastOrNull() },
+                // Gibt jedem Ziel einen eigenen Zustand und eigene ViewModels
+                entryDecorators =
+                    listOf(
+                        rememberSaveableStateHolderNavEntryDecorator(),
+                        rememberViewModelStoreNavEntryDecorator(),
+                    ),
+                entryProvider =
+                    entryProvider {
+                        entry<Destination.NowPlaying> { NowPlayingRoute() }
+                        entry<Destination.Show> { ShowRoute() }
+                        entry<Destination.HostProfile> { HostProfileRoute(snackbarHostState) }
+                        entry<Destination.SongRequest> { SongRequestRoute() }
+                    },
+            )
+            // Über allen Tabs, daher außerhalb von NavDisplay
+            RequestPlayedRoute(modifier = Modifier.align(Alignment.TopCenter))
+        }
     }
 }
 

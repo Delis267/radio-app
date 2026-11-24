@@ -11,6 +11,7 @@ import com.iu.radio_app.data.program.ProgramRepository
 import com.iu.radio_app.data.program.StubProgramRepository
 import com.iu.radio_app.data.program.StubProgramRepository.Companion.HOST
 import com.iu.radio_app.data.program.StubProgramRepository.Companion.SHOW
+import com.iu.radio_app.data.radio.stoppedRadio
 import com.iu.radio_app.data.rating.RatingRepository
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
@@ -172,7 +173,7 @@ class HostProfileViewModelTest {
             assertThat(state.submitted).isFalse()
         }
 
-    private class FakeProgramRepository : ProgramRepository by StubProgramRepository() {
+    private class FakeProgramRepository : ProgramRepository by StubProgramRepository(stoppedRadio()) {
         override val currentShow = MutableStateFlow<Show?>(SHOW)
     }
 
