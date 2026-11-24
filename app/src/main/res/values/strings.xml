@@ -39,10 +39,11 @@
     <string name="host_feedback_subtitle">Unsere Moderator:innen freuen sich über dein Feedback</string>
     <string name="host_feedback_opinion">Deine Meinung</string>
     <string name="host_feedback_submit">Moderation bewerten</string>
-    <!-- Prototyp: Rückmeldung als Toast -->
-    <string name="host_rating_saved">Bewertung gespeichert</string>
-    <string name="host_feedback_saved">Danke für dein Feedback</string>
+    <string name="host_feedback_counter">%1$d/%2$d</string>
+    <string name="host_thanks_title">Danke für deine Stimme!</string>
+    <string name="host_thanks_text">Deine Bewertung wurde gespeichert. Dein Feedback hilft unseren Moderator:innen dabei das Programm zu verbessern.</string>
     <string name="host_rating_failed">Bewertung konnte nicht gespeichert werden</string>
+    <string name="host_rating_retry">Erneut versuchen</string>
 
     <!-- Songwunsch -->
     <string name="song_request_search_placeholder">Artist oder Songtitel</string>

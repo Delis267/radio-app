@@ -18,12 +18,15 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -65,10 +68,13 @@ fun RadioAppRoot(viewModel: SessionViewModel = hiltViewModel()) {
 @Composable
 private fun MainNavigation() {
     val backStack = rememberNavBackStack(Destination.NowPlaying)
+    // Gemeinsamer Platz für Snackbars aller Screens, erscheint über der Navigationsleiste
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopBar() },
         bottomBar = { BottomBar(backStack) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         // Edge-to-Edge: Android verkleinert das Fenster nicht mehr für die Tastatur, daher selbst Platz lassen,
         // sonst verdeckt sie Eingabefelder und Buttons unten im Screen (z. B. Vorschlag einreichen)
@@ -86,7 +92,7 @@ private fun MainNavigation() {
                     entryProvider {
                         entry<Destination.NowPlaying> { NowPlayingRoute() }
                         entry<Destination.Show> { ShowRoute() }
-                        entry<Destination.HostProfile> { HostProfileRoute() }
+                        entry<Destination.HostProfile> { HostProfileRoute(snackbarHostState) }
                         entry<Destination.SongRequest> { SongRequestRoute() }
                     },
             )
