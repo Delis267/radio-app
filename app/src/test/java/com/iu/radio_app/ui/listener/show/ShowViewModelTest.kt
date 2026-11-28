@@ -6,8 +6,8 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.StubProgramRepository
-import com.iu.radio_app.data.radio.stoppedRadio
+import com.iu.radio_app.data.program.SimulatedProgramRepository
+import com.iu.radio_app.data.radio.stoppedStation
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
 import kotlinx.coroutines.flow.first
@@ -21,9 +21,11 @@ class ShowViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val program = StubProgramRepository(stoppedRadio())
+    // Gestoppter Sender: Beim Programmstart läuft Elises Sendung, und dabei bleibt es
+    private val station = stoppedStation()
+    private val program = SimulatedProgramRepository(station)
     private val ratings = StubRatingRepository()
-    private val target = RatingTarget.Show(StubProgramRepository.SHOW.id)
+    private val target = RatingTarget.Show(station.currentShow.value.id)
 
     private lateinit var viewModel: ShowViewModel
 
@@ -35,7 +37,7 @@ class ShowViewModelTest {
     @Test
     fun `aktuelle Sendung wird geladen`() {
         assertThat(viewModel.uiState.value.show)
-            .isEqualTo(StubProgramRepository.SHOW)
+            .isEqualTo(station.currentShow.value)
     }
 
     @Test
