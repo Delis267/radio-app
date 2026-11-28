@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.iu.radio_app.data.radio.StubRadio
-import com.iu.radio_app.data.songrequest.StubSongRequestRepository
+import com.iu.radio_app.data.coroutines.ApplicationScope
+import com.iu.radio_app.data.songrequest.SongRequestRepository
 import com.iu.radio_app.model.SongRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -17,7 +17,7 @@ import javax.inject.Singleton
 
 /**
  * Datenquelle ohne Netzwerk für lokale Entwicklung (ADR 003). Später ersetzt durch Firebase Cloud Messaging.
- * Meldet eigene Wünsche, die [StubRadio] gespielt hat, als System-Benachrichtigung, solange die Einstellung an ist.
+ * Meldet eigene Wünsche, die der Sender gespielt hat, als System-Benachrichtigung, solange die Einstellung an ist.
  * Ist die App offen, entfällt sie, dann zeigt die App selbst einen Banner.
  */
 @Singleton
@@ -30,11 +30,11 @@ class StubNotificationRepository(
     @Inject
     constructor(
         @ApplicationContext context: Context,
-        songRequests: StubSongRequestRepository,
-        radio: StubRadio,
+        songRequests: SongRequestRepository,
+        @ApplicationScope scope: CoroutineScope,
     ) : this(
         songRequests.playedRequests,
-        radio.scope,
+        scope,
         { ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) },
         PlayedRequestNotification(context)::show,
     )

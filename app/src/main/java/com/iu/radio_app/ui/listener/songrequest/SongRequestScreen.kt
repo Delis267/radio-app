@@ -6,10 +6,8 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -35,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -53,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iu.radio_app.R
 import com.iu.radio_app.model.SongRequest
 import com.iu.radio_app.model.Track
+import com.iu.radio_app.ui.components.CoverImage
 import com.iu.radio_app.ui.components.PrimaryButton
 import com.iu.radio_app.ui.components.ScreenWithBottomSection
 import com.iu.radio_app.ui.theme.RadioappTheme
@@ -258,17 +256,7 @@ private fun <T> TrackList(
 
 @Composable
 private fun RowScope.TrackInfo(track: Track) {
-    // Platzhalter, bis Cover über coverUrl geladen werden
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-            Modifier
-                .size(54.dp)
-                .clip(MaterialTheme.shapes.small)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-    ) {
-        Icon(painterResource(R.drawable.ic_list_music), contentDescription = null)
-    }
+    CoverImage(track.coverUrl, modifier = Modifier.size(54.dp))
     Column(modifier = Modifier.weight(1f)) {
         Text(track.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
         Text(track.artist, style = MaterialTheme.typography.bodyMedium)

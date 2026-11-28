@@ -4,7 +4,8 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.iu.radio_app.MainDispatcherRule
-import com.iu.radio_app.data.radio.StubRadio
+import com.iu.radio_app.data.radio.SimulatedStation
+import com.iu.radio_app.data.radio.runningStation
 import com.iu.radio_app.data.songrequest.StubSongRequestRepository
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -17,11 +18,11 @@ class RequestPlayedViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val wished = StubRadio.CATALOG[1]
+    private val wished = SimulatedStation.CATALOG[1]
 
     /** Erster Titel läuft, [wished] ist gewünscht und kommt nach einem Intervall. */
     private suspend fun TestScope.wishSecondTrack(): RequestPlayedViewModel {
-        val songRequests = StubSongRequestRepository(StubRadio(backgroundScope, StubRadio.INTERVAL))
+        val songRequests = runningStation().let { StubSongRequestRepository(it, it.scope) }
         val viewModel = RequestPlayedViewModel(songRequests)
         runCurrent()
         songRequests.request(wished.id).getOrThrow()
@@ -34,7 +35,7 @@ class RequestPlayedViewModelTest {
             val viewModel = wishSecondTrack()
             assertThat(viewModel.uiState.value.track).isNull()
 
-            advanceTimeBy(StubRadio.INTERVAL)
+            advanceTimeBy(SimulatedStation.INTERVAL)
             runCurrent()
             assertThat(viewModel.uiState.value.track).isEqualTo(wished)
 
@@ -47,7 +48,7 @@ class RequestPlayedViewModelTest {
     fun `Banner laesst sich wegtippen`() =
         runTest {
             val viewModel = wishSecondTrack()
-            advanceTimeBy(StubRadio.INTERVAL)
+            advanceTimeBy(SimulatedStation.INTERVAL)
             runCurrent()
 
             viewModel.onDismiss()

@@ -7,8 +7,8 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.StubProgramRepository
-import com.iu.radio_app.data.radio.StubRadio
+import com.iu.radio_app.data.radio.SimulatedStation
+import com.iu.radio_app.data.radio.runningStation
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,8 +26,8 @@ class NowPlayingViewModelTest {
     private val ratings = StubRatingRepository()
 
     private fun TestScope.createViewModel(): NowPlayingViewModel {
-        val radio = StubRadio(backgroundScope, StubRadio.INTERVAL)
-        val program = StubProgramRepository(radio)
+        // Sender auf der Testuhr, beim Start läuft der erste Titel des Katalogs
+        val program = runningStation()
         val viewModel = NowPlayingViewModel(program, ratings)
         runCurrent()
         return viewModel
@@ -37,7 +37,7 @@ class NowPlayingViewModelTest {
     fun `laufender Titel wird aus Repository geladen`() =
         runTest {
             val viewModel = createViewModel()
-            assertThat(viewModel.uiState.value.playedTrack?.track).isEqualTo(StubRadio.CATALOG[0])
+            assertThat(viewModel.uiState.value.playedTrack?.track).isEqualTo(SimulatedStation.CATALOG[0])
         }
 
     @Test
@@ -56,7 +56,7 @@ class NowPlayingViewModelTest {
             viewModel.submitRating()
             runCurrent()
 
-            val target = RatingTarget.Song(StubRadio.CATALOG[0].id)
+            val target = RatingTarget.Song(SimulatedStation.CATALOG[0].id)
             assertThat(ratings.myRating(target).first()?.stars).isEqualTo(5)
             assertThat(viewModel.uiState.value.message).isEqualTo(R.string.now_playing_rating_saved)
         }

@@ -35,3 +35,7 @@ keystore.properties
 .DS_Store
 Thumbs.db
 desktop.in
+
+# ── Firebase CLI (Regeln deployen) ───────────────────
+firebase-debug.log
+.firebase/

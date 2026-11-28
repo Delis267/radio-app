@@ -4,7 +4,7 @@ package com.iu.radio_app.ui.listener.show
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.ProgramRepository
+import com.iu.radio_app.data.radio.RadioRepository
 import com.iu.radio_app.data.rating.RatingRepository
 import com.iu.radio_app.model.RatingTarget
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ShowViewModel @Inject constructor(
-    programRepository: ProgramRepository,
+    radioRepository: RadioRepository,
     private val ratingRepository: RatingRepository,
 ) : ViewModel() {
 
@@ -28,7 +28,7 @@ class ShowViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            programRepository.currentShow.collectLatest { show ->
+            radioRepository.currentShow.collectLatest { show ->
                 state.update {
                     it.copy(
                         show = show,
@@ -40,7 +40,7 @@ class ShowViewModel @Inject constructor(
                 if (show != null) {
                     coroutineScope {
                         launch {
-                            programRepository.playlist(show.id).collect { playlist ->
+                            radioRepository.playlist(show.id).collect { playlist ->
                                 state.update { it.copy(playlist = playlist) }
                             }
                         }

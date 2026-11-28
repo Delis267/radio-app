@@ -1,6 +1,7 @@
 # Entscheidung
 - Dependency Injection mit Hilt über KSP (kein kapt).
 - Nebenläufigkeit mit Coroutines und Flow, UI-Zustand als `StateFlow`, gesammelt mit `collectAsStateWithLifecycle()`.
+- Bilder (Fotos der Moderation, Cover) lädt Coil 3 aus der URL, die der Sender liefert.
 - Tests mit JUnit 4, Assertions mit AssertK, Fakes statt Mock-Framework.
 - Statische Analyse nur mit Android Lint, die CI schlägt nur bei Befunden der Schwere Error fehl. Kein ktlint.
 - Veraltete Versionen im Versionskatalog werden beim Einrichten mit aktualisiert.

@@ -3,7 +3,7 @@ package com.iu.radio_app.ui.listener.hostprofile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.ProgramRepository
+import com.iu.radio_app.data.radio.RadioRepository
 import com.iu.radio_app.data.rating.RatingRepository
 import com.iu.radio_app.model.Host
 import com.iu.radio_app.model.RatingTarget
@@ -21,7 +21,7 @@ import kotlin.time.Duration.Companion.seconds
 class HostProfileViewModel
     @Inject
     constructor(
-        programRepository: ProgramRepository,
+        radioRepository: RadioRepository,
         private val ratingRepository: RatingRepository,
     ) : ViewModel() {
         private val state = MutableStateFlow(HostProfileUiState())
@@ -38,7 +38,7 @@ class HostProfileViewModel
 
         init {
             viewModelScope.launch {
-                programRepository.currentShow.collect { show ->
+                radioRepository.currentShow.collect { show ->
                     latestHost = show?.host
                     showLatestHost()
                 }

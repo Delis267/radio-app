@@ -12,7 +12,7 @@ import assertk.assertions.prop
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
 import com.iu.radio_app.data.notification.StubNotificationRepository
-import com.iu.radio_app.data.radio.stoppedRadio
+import com.iu.radio_app.data.radio.stoppedStation
 import com.iu.radio_app.data.songrequest.StubSongRequestRepository
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -26,14 +26,15 @@ class SongRequestViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val songRequests = StubSongRequestRepository(stoppedRadio())
-    private val notifications = StubNotificationRepository(emptyFlow(), stoppedRadio().scope, isAppInForeground = { false }) {}
+    private val station = stoppedStation()
+    private val songRequests = StubSongRequestRepository(station, station.scope)
+    private val notifications = StubNotificationRepository(emptyFlow(), stoppedStation().scope, isAppInForeground = { false }) {}
     private lateinit var viewModel: SongRequestViewModel
 
     // Erst nach der Rule anlegen, sonst startet viewModelScope ohne Test-Dispatcher
     @Before
     fun setUp() {
-        viewModel = SongRequestViewModel(songRequests, notifications)
+        viewModel = SongRequestViewModel(station, songRequests, notifications)
     }
 
     private val state get() = viewModel.uiState.value

@@ -7,11 +7,10 @@ import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.ProgramRepository
-import com.iu.radio_app.data.program.StubProgramRepository
-import com.iu.radio_app.data.program.StubProgramRepository.Companion.HOST
-import com.iu.radio_app.data.program.StubProgramRepository.Companion.SHOW
-import com.iu.radio_app.data.radio.stoppedRadio
+import com.iu.radio_app.data.radio.RadioRepository
+import com.iu.radio_app.data.radio.SimulatedStation
+import com.iu.radio_app.data.radio.runningStation
+import com.iu.radio_app.data.radio.stoppedStation
 import com.iu.radio_app.data.rating.RatingRepository
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
@@ -21,6 +20,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -31,7 +31,7 @@ class HostProfileViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val program = FakeProgramRepository()
+    private val program = FakeRadioRepository()
     private val ratings = FakeRatingRepository()
     private val target = RatingTarget.Moderation(HOST.id)
     private lateinit var viewModel: HostProfileViewModel
@@ -173,7 +173,32 @@ class HostProfileViewModelTest {
             assertThat(state.submitted).isFalse()
         }
 
-    private class FakeProgramRepository : ProgramRepository by StubProgramRepository(stoppedRadio()) {
+    // Prüft das Zusammenspiel mit dem echten simulierten Sender statt mit dem Fake
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `nach der Dankeskarte wechselt die Ansicht mit der Sendung zum naechsten Host`() =
+        runTest {
+            val viewModel = HostProfileViewModel(runningStation(), ratings)
+            runCurrent()
+            viewModel.onRate(4)
+            viewModel.onOpinionChange("Super Stimme")
+            viewModel.submit()
+
+            // Elises Playlist hat fünf Titel, danach läuft Toms Sendung
+            advanceTimeBy(SimulatedStation.INTERVAL * 5)
+            runCurrent()
+
+            val state = viewModel.uiState.value
+            assertThat(state.host).isEqualTo(SimulatedStation.TOM)
+            assertThat(state.rating).isNull()
+            assertThat(state.opinion).isEqualTo("")
+            val elisesRating = ratings.myRating(target).first()
+            assertThat(elisesRating?.stars).isEqualTo(4)
+            assertThat(elisesRating?.comment).isEqualTo("Super Stimme")
+            assertThat(ratings.myRating(RatingTarget.Moderation(SimulatedStation.TOM.id)).first()).isNull()
+        }
+
+    private class FakeRadioRepository : RadioRepository by stoppedStation() {
         override val currentShow = MutableStateFlow<Show?>(SHOW)
     }
 
@@ -197,6 +222,10 @@ class HostProfileViewModelTest {
     }
 
     private companion object {
+        val HOST = SimulatedStation.ELISE
+
+        // Beim Programmstart läuft Elises Sendung, der gestoppte Sender bleibt dort stehen
+        val SHOW = stoppedStation().currentShow.value
         val OTHER_SHOW = SHOW.copy(id = "abend", host = HOST.copy(id = "max", name = "Max Weber"))
     }
 }

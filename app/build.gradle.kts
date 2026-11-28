@@ -1,9 +1,28 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.google.services)
+}
+
+/**
+ * Liest eine Einstellung der App. Reihenfolge: `-P` bzw. `~/.gradle/gradle.properties`, dann `local.properties`
+ * im Projekt (nicht eingecheckt, je Person), sonst [default].
+ */
+fun radioSetting(
+    name: String,
+    default: String,
+): String {
+    val local =
+        providers
+            .fileContents(rootProject.layout.projectDirectory.file("local.properties"))
+            .asText
+            .map { text -> Properties().apply { load(text.reader()) }.getProperty(name) }
+    return providers.gradleProperty(name).orElse(local).getOrElse(default).trim()
 }
 
 android {
@@ -21,6 +40,10 @@ android {
         versionName = providers.gradleProperty("versionName").getOrElse("0.1.0-dev")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Backend wählen (ADR 003), Erklärung der Einstellungen in gradle.properties
+        val useStubs = radioSetting("radio.stubs", default = "false").toBoolean()
+        buildConfigField("boolean", "USE_STUBS", useStubs.toString())
     }
 
     // Signatur nur, wenn die Release-Pipeline die Secrets setzt
@@ -56,6 +79,11 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    // android.util.Log in den Stubs liefert in lokalen Tests nur Standardwerte statt einer Exception
+    testOptions {
+        unitTests.isReturnDefaultValues = true
     }
     // android.util.Log in den Stubs liefert in lokalen Tests nur Standardwerte statt einer Exception
     testOptions {
@@ -76,6 +104,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.viewmodel.compose)
@@ -83,6 +115,7 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     testImplementation(libs.konsist)
     testImplementation(libs.assertk)
