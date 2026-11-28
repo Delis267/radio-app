@@ -2,10 +2,35 @@ rules_version = '2';
 
 // Sicherheitsregeln für Firestore (ADR 003). Deployen mit: firebase deploy --only firestore:rules
 // Firestore enthält nur Daten der App, Senderdaten stehen im Code (ADR 011).
-// Regeln für songRequests, suggestions und ratings kommen mit den Firestore-Repositories dazu.
+// Regeln für songRequests und suggestions kommen mit deren Firestore-Repository dazu.
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Alles ist gesperrt, bis es eine eigene Regel bekommt
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Bewertungen, Aufbau siehe RatingDocument.kt. Lesen alle Angemeldeten, schreiben nur das eigene Dokument.
+    match /ratings/{ratingId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && validRating(ratingId, request.resource.data);
+      allow delete: if signedIn() && resource.data.userId == request.auth.uid;
+
+      function validRating(id, rating) {
+        return rating.keys().hasOnly(['userId', 'targetType', 'targetId', 'stars', 'comment', 'createdAt'])
+          && rating.userId == request.auth.uid
+          // Feste ID je Person und Ziel: Niemand kann ein zweites Dokument für dasselbe Ziel anlegen
+          && id == rating.userId + '_' + rating.targetType + '_' + rating.targetId
+          && rating.targetType in ['song', 'show', 'moderation']
+          && rating.targetId is string && rating.targetId.size() > 0
+          && rating.stars is int && rating.stars >= 1 && rating.stars <= 5
+          // Höchstlänge wie HostProfileViewModel.MAX_OPINION_LENGTH, die App allein lässt sich umgehen
+          && (rating.comment == null || (rating.comment is string && rating.comment.size() <= 800))
+          && rating.createdAt == request.time;
+      }
+    }
+
+    // Alles andere ist gesperrt, bis es eine eigene Regel bekommt
     match /{document=**} {
       allow read, write: if false;
     }
