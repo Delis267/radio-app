@@ -37,6 +37,9 @@ app/src/main/java/com/iu/radio_app/
   So findet man einen Text über den Ort, an dem er erscheint.
 - `data/` und `model/` sind nach Thema geschnitten und werden von beiden Rollen geteilt.
 - Repository-Interfaces liegen in `data/<topic>/`, neben ihren Implementierungen.
+- Braucht ein Repository Daten eines anderen Themas, hängt es von dessen Interface ab, nicht von der Implementierung,
+  z. B. die Songwünsche vom `RadioRepository` (ADR 011).
+- Was dauerhaft im Hintergrund läuft, nutzt den `@ApplicationScope` aus `data/coroutines/`.
 - Repositories liefern `Flow` und Modelle aus `model/`, Firebase-Typen und DTOs verlassen `data/` nicht.
 - Ein eigener UiState-Typ für Daten entsteht nur, wenn der Bildschirm sie aufbereitet anzeigt.
 - Repository und Datenquelle bleiben zusammengelegt, bis es eine zweite Quelle gibt.

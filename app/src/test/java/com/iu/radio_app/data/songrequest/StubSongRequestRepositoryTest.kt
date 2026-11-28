@@ -21,16 +21,7 @@ import org.junit.Test
 
 class StubSongRequestRepositoryTest {
     // Sender steht still, nur die Tests unten spielen Titel ab
-    private val repository = StubSongRequestRepository(stoppedStation())
-
-    @Test
-    fun `Suche findet Interpret und Titel ohne Gross- und Kleinschreibung`() =
-        runTest {
-            assertThat(repository.search(" queen ").getOrThrow().map { it.id })
-                .containsExactly("bohemian-rhapsody", "dont-stop-me-now")
-            assertThat(repository.search("LUFTBALL").getOrThrow().map { it.id }).containsExactly("99-luftballons")
-            assertThat(repository.search("gibt es nicht").getOrThrow()).isEmpty()
-        }
+    private val repository = stoppedStation().let { StubSongRequestRepository(it, it.scope) }
 
     @Test
     fun `Wunsch erscheint in offenen Wuenschen, neueste zuerst`() =
@@ -66,7 +57,7 @@ class StubSongRequestRepositoryTest {
     fun `gespielter Wunsch ist nicht mehr offen und wird gemeldet`() =
         runTest {
             val radio = runningStation()
-            val repository = StubSongRequestRepository(radio)
+            val repository = StubSongRequestRepository(radio, radio.scope)
             val played = mutableListOf<SongRequest>()
             backgroundScope.launch { repository.playedRequests.collect { played += it } }
             runCurrent() // Erster Titel im Karussell läuft
@@ -85,7 +76,7 @@ class StubSongRequestRepositoryTest {
     fun `nach dem Spielen kann man sich den Titel erneut wuenschen`() =
         runTest {
             val radio = runningStation()
-            val repository = StubSongRequestRepository(radio)
+            val repository = StubSongRequestRepository(radio, radio.scope)
             runCurrent()
             repository.request("dont-stop-me-now").getOrThrow()
             advanceTimeBy(SimulatedStation.INTERVAL)

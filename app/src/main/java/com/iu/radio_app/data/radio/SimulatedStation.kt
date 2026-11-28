@@ -1,13 +1,12 @@
 package com.iu.radio_app.data.radio
 
 import android.util.Log
+import com.iu.radio_app.data.coroutines.ApplicationScope
 import com.iu.radio_app.model.Host
 import com.iu.radio_app.model.PlayedTrack
 import com.iu.radio_app.model.Show
 import com.iu.radio_app.model.Track
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,21 +32,34 @@ import kotlin.time.Instant
  *
  * Die Zeit ist in Sendeplätze von je [interval] eingeteilt, gezählt ab [PROGRAM_START].
  * Ein Durchlauf aller Sendungen dauert [CYCLE] Sendeplätze.
+ *
+ * Einzige Implementierung von [RadioRepository], in beiden Betriebsarten dieselbe (ADR 003).
  */
 @Singleton
 class SimulatedStation(
-    /** Hier laufen der Sender und alle Repositories, die auf ihn reagieren. */
+    /** Hier läuft der Sender. In Tests auch die Repositories, die auf ihn reagieren. */
     val scope: CoroutineScope,
     private val clock: Clock,
     private val interval: Duration,
-) {
+) : RadioRepository {
     @Inject
-    constructor() : this(CoroutineScope(SupervisorJob() + Dispatchers.Default), Clock.System, INTERVAL)
+    constructor(@ApplicationScope scope: CoroutineScope) : this(scope, Clock.System, INTERVAL)
+
+    override val catalog: List<Track> get() = CATALOG
+
+    /** Wartet kurz wie bei einer Anfrage an einen echten Sender, damit die App ihren Ladezustand zeigt. */
+    override suspend fun search(query: String): Result<List<Track>> {
+        delay(SEARCH_LATENCY)
+        val term = query.trim()
+        val hits = CATALOG.filter { it.artist.contains(term, ignoreCase = true) || it.title.contains(term, ignoreCase = true) }
+        Log.d(TAG, "Suche \"$term\": ${hits.size} Treffer ${hits.map { it.id }}")
+        return Result.success(hits)
+    }
 
     private val slot = MutableStateFlow(slotAt(clock.now()))
 
     /** Gerade laufender Titel. */
-    val nowPlaying: StateFlow<PlayedTrack?> = MutableStateFlow<PlayedTrack?>(trackInSlot(slot.value)).also { flow ->
+    override val nowPlaying: StateFlow<PlayedTrack?> = MutableStateFlow<PlayedTrack?>(trackInSlot(slot.value)).also { flow ->
         scope.launch { slot.collect { flow.value = trackInSlot(it) } }
     }.asStateFlow()
 
@@ -57,7 +69,7 @@ class SimulatedStation(
     }.asStateFlow()
 
     /** Gerade laufende Ausgabe einer Sendung. Es läuft immer eine. */
-    val currentShow: StateFlow<Show> = MutableStateFlow(showInSlot(slot.value)).also { flow ->
+    override val currentShow: StateFlow<Show> = MutableStateFlow(showInSlot(slot.value)).also { flow ->
         scope.launch { slot.collect { flow.value = showInSlot(it) } }
     }.asStateFlow()
 
@@ -73,13 +85,13 @@ class SimulatedStation(
     }
 
     /** Bisher gespielte Titel der letzten oder laufenden Ausgabe von [showId], inklusive des laufenden. */
-    fun playlistOf(showId: String): Flow<List<PlayedTrack>> =
+    override fun playlist(showId: String): Flow<List<PlayedTrack>> =
         slot.map { now -> latestEdition(showId, now)?.let { first -> (first..minOf(now, first + lengthOf(showId) - 1)) } }
             .distinctUntilChanged()
             .map { slots -> slots?.map(::trackInSlot).orEmpty() }
 
     /** Letzte oder laufende Ausgabe jeder Sendung von [hostId], neueste zuerst. */
-    fun showsOf(hostId: String): Flow<List<Show>> =
+    override fun showsOf(hostId: String): Flow<List<Show>> =
         slot.map { now ->
             SCHEDULE
                 .filter { it.host.id == hostId }
@@ -131,6 +143,7 @@ class SimulatedStation(
         private const val TAG = "SimulatedStation"
         val INTERVAL = 1.minutes
         private const val MAX_HISTORY = 50
+        private val SEARCH_LATENCY = 300.milliseconds
 
         /** Ab hier zählt der Sender. Nie ändern, sonst passt „gespielt“ nicht mehr zu bestehenden Wünschen. */
         val PROGRAM_START: Instant = Instant.parse("2026-01-01T00:00:00Z")

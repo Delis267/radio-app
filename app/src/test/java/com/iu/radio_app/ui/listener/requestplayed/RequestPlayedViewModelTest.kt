@@ -22,7 +22,7 @@ class RequestPlayedViewModelTest {
 
     /** Erster Titel läuft, [wished] ist gewünscht und kommt nach einem Intervall. */
     private suspend fun TestScope.wishSecondTrack(): RequestPlayedViewModel {
-        val songRequests = StubSongRequestRepository(runningStation())
+        val songRequests = runningStation().let { StubSongRequestRepository(it, it.scope) }
         val viewModel = RequestPlayedViewModel(songRequests)
         runCurrent()
         songRequests.request(wished.id).getOrThrow()

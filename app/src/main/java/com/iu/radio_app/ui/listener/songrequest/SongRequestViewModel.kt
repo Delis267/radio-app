@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iu.radio_app.R
 import com.iu.radio_app.data.notification.NotificationRepository
+import com.iu.radio_app.data.radio.RadioRepository
 import com.iu.radio_app.data.songrequest.AlreadyRequestedException
 import com.iu.radio_app.data.songrequest.SongRequestRepository
 import com.iu.radio_app.model.Track
@@ -26,6 +27,7 @@ import javax.inject.Inject
 class SongRequestViewModel
     @Inject
     constructor(
+        private val radioRepository: RadioRepository,
         private val songRequestRepository: SongRequestRepository,
         private val notificationRepository: NotificationRepository,
     ) : ViewModel() {
@@ -53,7 +55,7 @@ class SongRequestViewModel
                 .debounce(SEARCH_DEBOUNCE_MS)
                 .collectLatest { term ->
                     if (term.length < MIN_QUERY_LENGTH) return@collectLatest
-                    songRequestRepository
+                    radioRepository
                         .search(term)
                         .onSuccess { hits ->
                             state.update {

@@ -6,7 +6,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.SimulatedProgramRepository
 import com.iu.radio_app.data.radio.stoppedStation
 import com.iu.radio_app.data.rating.StubRatingRepository
 import com.iu.radio_app.model.RatingTarget
@@ -23,7 +22,6 @@ class ShowViewModelTest {
 
     // Gestoppter Sender: Beim Programmstart läuft Elises Sendung, und dabei bleibt es
     private val station = stoppedStation()
-    private val program = SimulatedProgramRepository(station)
     private val ratings = StubRatingRepository()
     private val target = RatingTarget.Show(station.currentShow.value.id)
 
@@ -31,7 +29,7 @@ class ShowViewModelTest {
 
     @Before
     fun setUp() {
-        viewModel = ShowViewModel(program, ratings)
+        viewModel = ShowViewModel(station, ratings)
     }
 
     @Test

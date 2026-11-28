@@ -26,14 +26,15 @@ class SongRequestViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val songRequests = StubSongRequestRepository(stoppedStation())
+    private val station = stoppedStation()
+    private val songRequests = StubSongRequestRepository(station, station.scope)
     private val notifications = StubNotificationRepository(emptyFlow(), stoppedStation().scope, isAppInForeground = { false }) {}
     private lateinit var viewModel: SongRequestViewModel
 
     // Erst nach der Rule anlegen, sonst startet viewModelScope ohne Test-Dispatcher
     @Before
     fun setUp() {
-        viewModel = SongRequestViewModel(songRequests, notifications)
+        viewModel = SongRequestViewModel(station, songRequests, notifications)
     }
 
     private val state get() = viewModel.uiState.value

@@ -15,6 +15,17 @@ import kotlin.time.Instant
 
 class SimulatedStationTest {
     @Test
+    fun `Suche findet Interpret und Titel ohne Gross- und Kleinschreibung`() =
+        runTest {
+            val station = stoppedStation()
+
+            assertThat(station.search(" queen ").getOrThrow().map { it.id })
+                .containsExactly("bohemian-rhapsody", "dont-stop-me-now")
+            assertThat(station.search("LUFTBALL").getOrThrow().map { it.id }).containsExactly("99-luftballons")
+            assertThat(station.search("gibt es nicht").getOrThrow()).isEmpty()
+        }
+
+    @Test
     fun `spielt den Katalog der Reihe nach im Abstand des Intervalls`() =
         runTest {
             val station = runningStation()
@@ -93,9 +104,9 @@ class SimulatedStationTest {
             val elise = station.currentShowIdOf(SimulatedStation.ELISE)
             val tom = station.currentShowIdOf(SimulatedStation.TOM)
 
-            assertThat(station.playlistOf(elise).first().map { it.track })
+            assertThat(station.playlist(elise).first().map { it.track })
                 .isEqualTo(SimulatedStation.CATALOG.take(ELISE_TRACKS))
-            assertThat(station.playlistOf(tom).first().map { it.track })
+            assertThat(station.playlist(tom).first().map { it.track })
                 .isEqualTo(SimulatedStation.CATALOG.subList(ELISE_TRACKS, ELISE_TRACKS + 3))
         }
 

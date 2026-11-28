@@ -3,7 +3,7 @@ package com.iu.radio_app.ui.listener.nowplaying
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.ProgramRepository
+import com.iu.radio_app.data.radio.RadioRepository
 import com.iu.radio_app.data.rating.RatingRepository
 import com.iu.radio_app.model.RatingTarget
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,7 @@ import javax.inject.Inject
 class NowPlayingViewModel
     @Inject
     constructor(
-        programRepository: ProgramRepository,
+        radioRepository: RadioRepository,
         private val ratingRepository: RatingRepository,
     ) : ViewModel() {
         private val state = MutableStateFlow(NowPlayingUiState())
@@ -27,7 +27,7 @@ class NowPlayingViewModel
 
         init {
             viewModelScope.launch {
-                programRepository.nowPlaying.collectLatest { played ->
+                radioRepository.nowPlaying.collectLatest { played ->
                     val track = played?.track
                     if (track == null) {
                         state.update { it.copy(playedTrack = null, rating = null) }

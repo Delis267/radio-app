@@ -7,7 +7,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.SimulatedProgramRepository
 import com.iu.radio_app.data.radio.SimulatedStation
 import com.iu.radio_app.data.radio.runningStation
 import com.iu.radio_app.data.rating.StubRatingRepository
@@ -28,7 +27,7 @@ class NowPlayingViewModelTest {
 
     private fun TestScope.createViewModel(): NowPlayingViewModel {
         // Sender auf der Testuhr, beim Start läuft der erste Titel des Katalogs
-        val program = SimulatedProgramRepository(runningStation())
+        val program = runningStation()
         val viewModel = NowPlayingViewModel(program, ratings)
         runCurrent()
         return viewModel

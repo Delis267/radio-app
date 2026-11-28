@@ -1,12 +1,12 @@
 package com.iu.radio_app.data.songrequest
 
 import android.util.Log
-import com.iu.radio_app.data.radio.SimulatedStation
-import com.iu.radio_app.data.radio.SimulatedStation.Companion.CATALOG
+import com.iu.radio_app.data.coroutines.ApplicationScope
+import com.iu.radio_app.data.radio.RadioRepository
 import com.iu.radio_app.model.RequestedTrack
 import com.iu.radio_app.model.SongRequest
 import com.iu.radio_app.model.Track
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,18 +19,18 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Datenquelle ohne Netzwerk für die Betriebsart Stubs (ADR 003). Kennt nur die eigenen Wünsche,
  * [requestedTracks] zählt daher nur diese.
- * Spielt [SimulatedStation] einen Titel, gelten alle offenen Wünsche dafür als gespielt (ADR 011).
+ * Spielt der Sender ([RadioRepository]) einen Titel, gelten alle offenen Wünsche dafür als gespielt (ADR 011).
  */
 @Singleton
 class StubSongRequestRepository
     @Inject
     constructor(
-        station: SimulatedStation,
+        private val radio: RadioRepository,
+        @ApplicationScope scope: CoroutineScope,
     ) : SongRequestRepository {
         private val requests = MutableStateFlow<List<SongRequest>>(emptyList())
         private val suggestions = mutableListOf<String>()
@@ -40,8 +40,8 @@ class StubSongRequestRepository
         override val playedRequests: SharedFlow<SongRequest> = played.asSharedFlow()
 
         init {
-            station.scope.launch {
-                station.nowPlaying.filterNotNull().collect { markPlayed(it.track) }
+            scope.launch {
+                radio.nowPlaying.filterNotNull().collect { markPlayed(it.track) }
             }
         }
 
@@ -60,17 +60,8 @@ class StubSongRequestRepository
             }
         }
 
-        override suspend fun search(query: String): Result<List<Track>> {
-            delay(SIMULATED_LATENCY_MS.milliseconds)
-            val term = query.trim()
-            val hits =
-                CATALOG.filter { it.artist.contains(term, ignoreCase = true) || it.title.contains(term, ignoreCase = true) }
-            Log.d(TAG, "Suche \"$term\": ${hits.size} Treffer ${hits.map { it.id }}")
-            return Result.success(hits)
-        }
-
         override suspend fun request(trackId: String): Result<SongRequest> {
-            val track = CATALOG.find { it.id == trackId }
+            val track = radio.catalog.find { it.id == trackId }
             if (track == null) {
                 Log.w(TAG, "Wunsch abgelehnt: Titel $trackId nicht im Katalog")
                 return Result.failure(NoSuchElementException("Track $trackId not in catalog"))
@@ -118,7 +109,6 @@ class StubSongRequestRepository
         companion object {
             // Höchstens 23 Zeichen, sonst kürzt Android den Tag unter API 26
             private const val TAG = "StubSongRequests"
-            private const val SIMULATED_LATENCY_MS = 300L
             private const val PLAYED_BUFFER = 16
         }
     }

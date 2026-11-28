@@ -7,8 +7,7 @@ import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import com.iu.radio_app.MainDispatcherRule
 import com.iu.radio_app.R
-import com.iu.radio_app.data.program.ProgramRepository
-import com.iu.radio_app.data.program.SimulatedProgramRepository
+import com.iu.radio_app.data.radio.RadioRepository
 import com.iu.radio_app.data.radio.SimulatedStation
 import com.iu.radio_app.data.radio.runningStation
 import com.iu.radio_app.data.radio.stoppedStation
@@ -32,7 +31,7 @@ class HostProfileViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val program = FakeProgramRepository()
+    private val program = FakeRadioRepository()
     private val ratings = FakeRatingRepository()
     private val target = RatingTarget.Moderation(HOST.id)
     private lateinit var viewModel: HostProfileViewModel
@@ -179,7 +178,7 @@ class HostProfileViewModelTest {
     @Test
     fun `nach der Dankeskarte wechselt die Ansicht mit der Sendung zum naechsten Host`() =
         runTest {
-            val viewModel = HostProfileViewModel(SimulatedProgramRepository(runningStation()), ratings)
+            val viewModel = HostProfileViewModel(runningStation(), ratings)
             runCurrent()
             viewModel.onRate(4)
             viewModel.onOpinionChange("Super Stimme")
@@ -199,7 +198,7 @@ class HostProfileViewModelTest {
             assertThat(ratings.myRating(RatingTarget.Moderation(SimulatedStation.TOM.id)).first()).isNull()
         }
 
-    private class FakeProgramRepository : ProgramRepository by SimulatedProgramRepository(stoppedStation()) {
+    private class FakeRadioRepository : RadioRepository by stoppedStation() {
         override val currentShow = MutableStateFlow<Show?>(SHOW)
     }
 
