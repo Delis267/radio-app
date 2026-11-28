@@ -46,7 +46,7 @@ fun HeroContainer(
         color = colors.inverseSurface,
         contentColor = colors.inverseOnSurface,
     ) {
-        Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 32.dp, bottom = 35.dp), content = content)
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 32.dp), content = content)
     }
 }
 
@@ -60,7 +60,7 @@ fun HeroTitle(
     Column(modifier = modifier) {
         Text(title, color = Color.White, style = MaterialTheme.typography.headlineLarge)
         if (showLine) {
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(13.dp))
             Box(Modifier.size(width = 32.dp, height = 3.dp).background(MaterialTheme.colorScheme.inversePrimary))
         }
     }
@@ -87,14 +87,13 @@ fun LiveTag(
         label = "dotAlpha",
     )
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        // graphicsLayer: Alpha wird nur beim Zeichnen gelesen, die Animation löst keine Recomposition aus
-        Box(Modifier.size(6.dp).graphicsLayer { alpha = dotAlpha }.background(color, CircleShape))
-        Spacer(Modifier.width(8.dp))
         Text(
             (text ?: stringResource(R.string.live_tag_default)).uppercase(),
             color = color,
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.4.sp),
         )
+        Spacer(Modifier.width(8.dp))
+        // graphicsLayer: Alpha wird nur beim Zeichnen gelesen, die Animation löst keine Recomposition aus
+        Box(Modifier.size(6.dp).graphicsLayer { alpha = dotAlpha }.background(color, CircleShape))
     }
 }
 

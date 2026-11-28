@@ -1,6 +1,5 @@
 package com.iu.radio_app.ui.listener.hostprofile
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.iu.radio_app.R
@@ -9,12 +8,14 @@ import com.iu.radio_app.data.rating.RatingRepository
 import com.iu.radio_app.model.Host
 import com.iu.radio_app.model.RatingTarget
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @HiltViewModel
 class HostProfileViewModel
@@ -26,57 +27,82 @@ class HostProfileViewModel
         private val state = MutableStateFlow(HostProfileUiState())
         val uiState: StateFlow<HostProfileUiState> = state.asStateFlow()
 
-        // Zuletzt abgeschickter Kommentar, damit ein späterer Sternklick ihn nicht überschreibt
-        private var savedComment: String? = null
+        // Wer gerade moderiert. Angezeigt wird er erst, wenn der Nutzer nicht mehr bewertet (showLatestHost).
+        private var latestHost: Host? = null
+
+        // Nur für die Sperre nötig, der Screen braucht den Wert nicht zurück
+        private var opinionFocused = false
+
+        // Dankeskarte bleibt nach dem Absenden mindestens CARD_HOLD stehen
+        private var holdingCard = false
 
         init {
             viewModelScope.launch {
-                programRepository.currentShow.collect { show -> onHostChange(show?.host) }
+                programRepository.currentShow.collect { show ->
+                    latestHost = show?.host
+                    showLatestHost()
+                }
             }
         }
 
-        /** Sternklick speichert sofort, damit man schnell bewerten kann. */
-        fun onRate(stars: Int) {
-            state.update { it.copy(rating = stars) }
-            save(stars, savedComment, R.string.host_rating_saved)
+        /** Wählt nur aus, abgeschickt wird mit [submit]. */
+        fun onRate(stars: Int) = state.update { it.copy(rating = stars) }
+
+        /** Übernimmt höchstens [MAX_OPINION_LENGTH] Zeichen, das Feld lässt deshalb keine weitere Eingabe zu. */
+        fun onOpinionChange(opinion: String) {
+            state.update { it.copy(opinion = opinion.take(MAX_OPINION_LENGTH)) }
+            showLatestHost()
         }
 
-        fun onOpinionChange(opinion: String) = state.update { it.copy(opinion = opinion) }
+        fun onOpinionFocusChange(focused: Boolean) {
+            opinionFocused = focused
+            showLatestHost()
+        }
 
-        /** Aktualisiert die bestehende Bewertung um den Kommentar. Ohne Sterne passiert nichts. */
+        /** Schickt Sterne und Kommentar einmalig ab. Ohne Sterne oder während des Sendens passiert nichts. */
         fun submit() {
+            // TODO: keine Prüfung auf frühere Bewertung (myRating), kommt mit echtem Datenspeicher
             val current = state.value
+            if (current.sending) return
+            val host = current.host ?: return
             val stars = current.rating ?: return
-            savedComment = current.opinion.trim().ifEmpty { null }
-            save(stars, savedComment, R.string.host_feedback_saved)
+            val comment = current.opinion.trim().ifEmpty { null }
+            state.update { it.copy(sending = true) }
+            viewModelScope.launch {
+                ratingRepository
+                    .rate(RatingTarget.Moderation(host.id), stars, comment)
+                    .onSuccess {
+                        // Das Textfeld verschwindet mit der Karte und meldet seinen Fokusverlust nicht mehr zuverlässig
+                        opinionFocused = false
+                        holdingCard = true
+                        state.update { it.copy(sending = false, submitted = true) }
+                        delay(CARD_HOLD)
+                        holdingCard = false
+                    }.onFailure { state.update { it.copy(sending = false, message = R.string.host_rating_failed) } }
+                showLatestHost()
+            }
         }
 
         fun onMessageShown() = state.update { it.copy(message = null) }
 
         /**
-         * Die Ansicht wechselt mit der laufenden Sendung zum nächsten Host.
-         * Sterne und Meinung gehören zum vorigen Host und werden verworfen, damit sie nicht beim neuen landen.
+         * Zeigt [latestHost], solange der Nutzer nicht gerade den angezeigten bewertet.
+         * Ein anderer Moderator (andere ID) bekommt ein leeres Formular, damit Eingaben nie beim falschen landen.
          */
-        private fun onHostChange(host: Host?) {
-            if (host?.id == state.value.host?.id) {
-                state.update { it.copy(host = host) }
-                return
+        private fun showLatestHost() =
+            state.update {
+                val busy = if (it.submitted) holdingCard else it.opinion.isNotEmpty() || opinionFocused || it.sending
+                when {
+                    it.host?.id == latestHost?.id -> it.copy(host = latestHost)
+                    busy -> it
+                    else -> HostProfileUiState(host = latestHost)
+                }
             }
-            savedComment = null
-            state.update { it.copy(host = host, rating = null, opinion = "") }
-        }
 
-        private fun save(
-            stars: Int,
-            comment: String?,
-            @StringRes successMessage: Int,
-        ) {
-            val host = state.value.host ?: return
-            viewModelScope.launch {
-                ratingRepository
-                    .rate(RatingTarget.Moderation(host.id), stars, comment)
-                    .onSuccess { state.update { it.copy(message = successMessage) } }
-                    .onFailure { state.update { it.copy(message = R.string.host_rating_failed) } }
-            }
+        companion object {
+            // TODO: Grenze auch in den Firestore-Regeln prüfen (comment.size() <= 800), die App kann umgangen werden.
+            const val MAX_OPINION_LENGTH = 800
+
+            val CARD_HOLD = 30.seconds
         }
     }

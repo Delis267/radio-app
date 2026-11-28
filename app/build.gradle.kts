@@ -85,6 +85,10 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
+    // android.util.Log in den Stubs liefert in lokalen Tests nur Standardwerte statt einer Exception
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
