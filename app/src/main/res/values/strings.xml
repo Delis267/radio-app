@@ -91,4 +91,16 @@
     <string name="notification_request_played_title">Dein Songwunsch läuft gerade</string>
     <string name="notification_request_played_text">%1$s – %2$s</string>
     <string name="in_app_banner_close">Hinweis schließen</string>
+
+    <!-- Sendung -->
+    <string name="show_rating_saved">Bewertung gespeichert</string>
+    <string name="show_rating_failed">Bewertung konnte nicht gespeichert werden</string>
+    <string name="show_current_tag">Aktuelle Sendung</string>
+    <string name="show_rate_title">Wie gefällt dir die aktuelle Sendung?</string>
+    <string name="show_rate_submit">Sendung bewerten</string>
+    <string name="show_playlist_title">Alle Titel der Sendung</string>
+    <string name="show_no_tracks">Noch keine Titel gespielt</string>
+    <string name="show_no_show">Aktuell keine Sendung</string>
+
+
 </resources>
