@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.iu.radio_app.R
 import com.iu.radio_app.model.PlayedTrack
 import com.iu.radio_app.model.Show
+import com.iu.radio_app.ui.components.CoverImage
 import com.iu.radio_app.ui.components.HeroContainer
 import com.iu.radio_app.ui.components.HeroTitle
 import com.iu.radio_app.ui.components.LiveTag
@@ -173,21 +173,7 @@ private fun PlaylistItem(played: PlayedTrack) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(
-                    MaterialTheme.colorScheme.surfaceContainerHighest,
-                    MaterialTheme.shapes.small,
-                ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_list_music),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        CoverImage(played.track.coverUrl, modifier = Modifier.size(48.dp))
 
         Column(
             modifier = Modifier.weight(1f),

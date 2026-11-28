@@ -1,6 +1,5 @@
 package com.iu.radio_app.ui.listener.hostprofile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.iu.radio_app.R
 import com.iu.radio_app.model.Host
 import com.iu.radio_app.ui.components.HeroContainer
@@ -122,9 +122,11 @@ private fun LiveHeader(
                     Text(stringResource(R.string.host_title), style = MaterialTheme.typography.bodyMedium)
                 }
             }
-            // Platzhalterbild, bis Fotos über photoUrl geladen werden
-            Image(
-                painter = painterResource(R.drawable.placeholder_host_photo),
+            // Foto vom Sender. Beim Laden leer, ohne Foto oder bei einem Fehler das Platzhalterbild
+            AsyncImage(
+                model = host.photoUrl,
+                error = painterResource(R.drawable.placeholder_host_photo),
+                fallback = painterResource(R.drawable.placeholder_host_photo),
                 contentDescription = stringResource(R.string.host_photo_description, firstName),
                 contentScale = ContentScale.Crop,
                 modifier =

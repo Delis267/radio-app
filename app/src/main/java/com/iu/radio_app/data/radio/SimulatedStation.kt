@@ -148,6 +148,21 @@ class SimulatedStation(
         /** Ab hier zählt der Sender. Nie ändern, sonst passt „gespielt“ nicht mehr zu bestehenden Wünschen. */
         val PROGRAM_START: Instant = Instant.parse("2026-01-01T00:00:00Z")
 
+        /** Bilder des Senders liegen in `app/src/main/assets`. Ein echter Sender würde hier normale URLs liefern. */
+        private const val ASSETS = "file:///android_asset/"
+
+        /** Foto unter `assets/hosts/{hostId}.png`. */
+        private fun hostPhoto(hostId: String) = "${ASSETS}hosts/$hostId.png"
+
+        /** Titel mit Cover unter `assets/covers/{trackId}.jpg`. Fehlt die Datei, zeigt die App den Platzhalter. */
+        private fun track(
+            id: String,
+            title: String,
+            artist: String,
+            album: String,
+            releaseYear: Int,
+        ) = Track(id, title, artist, album, releaseYear, coverUrl = "${ASSETS}covers/$id.jpg")
+
         // IDs in diesem Objekt nie ändern: Wünsche und Bewertungen in Firestore verweisen darauf (ADR 011)
 
         val ELISE =
@@ -157,7 +172,7 @@ class SimulatedStation(
                 description =
                     "Elise ist schon wach, wenn du noch den Snooze-Knopf suchst. Sie bringt dir Wetter, Stau und " +
                         "Ohrwürmer. Gut gelaunt wie sonst niemand vor 7 Uhr. Kaffee hilft, aber Elise hilft mehr.",
-                photoUrl = null,
+                photoUrl = hostPhoto("elise-mueller"),
             )
 
         // Platzhalter, bis Name und Beschreibung feststehen
@@ -166,7 +181,7 @@ class SimulatedStation(
                 id = "tom-berger",
                 name = "Tom Berger",
                 description = "Platzhalter: Beschreibung von Tom.",
-                photoUrl = null,
+                photoUrl = hostPhoto("tom-berger"),
             )
 
         /** Sendungen in der Reihenfolge, in der sie laufen. Jeder Titel gehört zu genau einer Sendung. */
@@ -178,11 +193,11 @@ class SimulatedStation(
                     host = ELISE,
                     playlist =
                         listOf(
-                            Track("bohemian-rhapsody", "Bohemian Rhapsody", "Queen", "A Night at the Opera", 1975, null),
-                            Track("dont-stop-me-now", "Don't Stop Me Now", "Queen", "Jazz", 1978, null),
-                            Track("billie-jean", "Billie Jean", "Michael Jackson", "Thriller", 1982, null),
-                            Track("99-luftballons", "99 Luftballons", "Nena", "Nena", 1983, null),
-                            Track("major-tom", "Major Tom (Völlig losgelöst)", "Peter Schilling", "Fehler im System", 1983, null),
+                            track("bohemian-rhapsody", "Bohemian Rhapsody", "Queen", "A Night at the Opera", 1975),
+                            track("dont-stop-me-now", "Don't Stop Me Now", "Queen", "Jazz", 1978),
+                            track("billie-jean", "Billie Jean", "Michael Jackson", "Thriller", 1982),
+                            track("99-luftballons", "99 Luftballons", "Nena", "Nena", 1983),
+                            track("major-tom", "Major Tom (Völlig losgelöst)", "Peter Schilling", "Fehler im System", 1983),
                         ),
                 ),
                 Plan(
@@ -191,11 +206,11 @@ class SimulatedStation(
                     host = TOM,
                     playlist =
                         listOf(
-                            Track("rolling-in-the-deep", "Rolling in the Deep", "Adele", "21", 2010, null),
-                            Track("atemlos", "Atemlos durch die Nacht", "Helene Fischer", "Farbenspiel", 2013, null),
-                            Track("auf-uns", "Auf uns", "Andreas Bourani", "Hey", 2014, null),
-                            Track("blinding-lights", "Blinding Lights", "The Weeknd", "After Hours", 2019, null),
-                            Track("bad-guy", "bad guy", "Billie Eilish", "When We All Fall Asleep, Where Do We Go?", 2019, null),
+                            track("rolling-in-the-deep", "Rolling in the Deep", "Adele", "21", 2010),
+                            track("atemlos", "Atemlos durch die Nacht", "Helene Fischer", "Farbenspiel", 2013),
+                            track("auf-uns", "Auf uns", "Andreas Bourani", "Hey", 2014),
+                            track("blinding-lights", "Blinding Lights", "The Weeknd", "After Hours", 2019),
+                            track("bad-guy", "bad guy", "Billie Eilish", "When We All Fall Asleep, Where Do We Go?", 2019),
                         ),
                 ),
             )

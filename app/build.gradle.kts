@@ -115,6 +115,7 @@ dependencies {
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.kotlinx.serialization.core)
+    implementation(libs.coil.compose)
     testImplementation(libs.junit)
     testImplementation(libs.konsist)
     testImplementation(libs.assertk)

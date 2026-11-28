@@ -70,6 +70,11 @@ flowchart LR
 - `RadioRepository` liefert laufende Sendung, „Jetzt läuft“, Playlists, Sendungen je Moderation, Katalog und Suche.
 - `SimulatedStation` ist die einzige Implementierung, in beiden Betriebsarten. Sie läuft im `@ApplicationScope`.
 - Startzeitpunkt ist der 1. Januar 2026, 00:00 UTC. Zwei Sendungen mit je fünf Titeln wechseln sich ab.
+- Bilder gehören zu den Senderdaten und liegen in `app/src/main/assets`: Fotos unter `hosts/{hostId}.png`,
+  Cover unter `covers/{trackId}.jpg`. Der Sender liefert sie als URL (`file:///android_asset/…`) in `Host.photoUrl`
+  und `Track.coverUrl`, die UI lädt sie mit Coil. Ein echter Sender würde normale URLs liefern.
+  Solange ein Bild lädt, bleibt die Fläche leer. Fehlt es, zeigt die UI einen Platzhalter.
+  Die Fotos sind vorerst Kopien des Platzhalterbilds, Cover gibt es noch keine.
 
 **Firestore** (Projekt `radio-app-iu`)
 - Die App meldet sich beim ersten Zugriff anonym an (`AnonymousUser`). Die `uid` bleibt auf dem Gerät gleich und ist die `userId`.
